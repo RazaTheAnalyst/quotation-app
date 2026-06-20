@@ -27,10 +27,10 @@ export default function Forwarders({ forwarders, onAdd, onDelete }: ForwardersPr
 
   return (
     <div className="forwarders-page">
-      <div className="forwarders-header">
-        <div>
-          <h2>Forwarders</h2>
-          <p className="forwarders-subtitle">Manage your logistics forwarder partners</p>
+      <div className="forwarders-hero">
+        <div className="forwarders-hero-content">
+          <h2>{'\uD83D\uDE9B'} Forwarders</h2>
+          <p>Manage your logistics forwarder partners</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
           {showForm ? '\u274C Cancel' : '+ Add Forwarder'}
@@ -39,10 +39,13 @@ export default function Forwarders({ forwarders, onAdd, onDelete }: ForwardersPr
 
       {showForm && (
         <div className="forwarders-form-card">
+          <div className="forwarders-form-header">
+            <span>{'\u2795'} New Forwarder</span>
+          </div>
           <form onSubmit={handleSubmit} className="forwarders-form">
-            <div className="form-grid-4">
+            <div className="forwarders-form-grid">
               <div className="form-group">
-                <label htmlFor="fwd-name">{'\uD83C\uDFED'} Company Name *</label>
+                <label htmlFor="fwd-name">Company Name *</label>
                 <input
                   id="fwd-name"
                   type="text"
@@ -53,7 +56,7 @@ export default function Forwarders({ forwarders, onAdd, onDelete }: ForwardersPr
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="fwd-contact">{'\uD83D\uDC64'} Contact Person</label>
+                <label htmlFor="fwd-contact">Contact Person</label>
                 <input
                   id="fwd-contact"
                   type="text"
@@ -63,7 +66,7 @@ export default function Forwarders({ forwarders, onAdd, onDelete }: ForwardersPr
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="fwd-email">{'\uD83D\uDCE7'} Email</label>
+                <label htmlFor="fwd-email">Email</label>
                 <input
                   id="fwd-email"
                   type="email"
@@ -73,7 +76,7 @@ export default function Forwarders({ forwarders, onAdd, onDelete }: ForwardersPr
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="fwd-phone">{'\uD83D\uDCDE'} Phone</label>
+                <label htmlFor="fwd-phone">Phone</label>
                 <input
                   id="fwd-phone"
                   type="text"
@@ -84,73 +87,66 @@ export default function Forwarders({ forwarders, onAdd, onDelete }: ForwardersPr
               </div>
             </div>
             <div className="forwarders-form-actions">
-              <button type="submit" className="btn btn-primary">{'\u2795'} Add Forwarder</button>
+              <button type="button" className="btn btn-cancel-sm" onClick={() => setShowForm(false)}>Cancel</button>
+              <button type="submit" className="btn btn-primary">Add Forwarder</button>
             </div>
           </form>
         </div>
       )}
 
-      <div className="forwarders-table-container">
-        {forwarders.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-state-icon">{'\uD83D\uDE9B'}</div>
-            <div className="empty-state-text">No forwarders yet. Add your first forwarder to get started.</div>
-          </div>
-        ) : (
-          <table className="forwarders-table">
-            <thead>
-              <tr>
-                <th>Company</th>
-                <th>Contact Person</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {forwarders.map((f, i) => (
-                <tr key={f.id} className="animate-row" style={{ animationDelay: `${i * 0.03}s` }}>
-                  <td className="td-name">{f.name}</td>
-                  <td>{f.contactPerson || '\u2014'}</td>
-                  <td className="td-mono">{f.email || '\u2014'}</td>
-                  <td className="td-mono">{f.phone || '\u2014'}</td>
-                  <td>
-                    <button
-                      className="btn-icon btn-delete-icon"
-                      title="Delete"
-                      onClick={() => onDelete(f.id)}
-                    >
-                      {'\uD83D\uDDD1\uFE0F'}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      <div className="forwarders-mobile-cards mobile-only">
-        {forwarders.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-state-icon">{'\uD83D\uDE9B'}</div>
-            <div className="empty-state-text">No forwarders yet.</div>
-          </div>
-        ) : (
-          forwarders.map((f, i) => (
-            <div key={f.id} className="forwarder-card animate-row" style={{ animationDelay: `${i * 0.05}s` }}>
-              <div className="forwarder-card-header">
-                <span className="forwarder-card-name">{f.name}</span>
-                <button className="btn-icon btn-delete-icon" title="Delete" onClick={() => onDelete(f.id)}>
-                  {'\uD83D\uDDD1\uFE0F'}
+      {forwarders.length === 0 ? (
+        <div className="forwarders-empty">
+          <div className="forwarders-empty-icon">{'\uD83D\uDE9B'}</div>
+          <h3>No forwarders yet</h3>
+          <p>Add your first forwarder to get started.</p>
+        </div>
+      ) : (
+        <div className="forwarders-grid">
+          {forwarders.map((f, i) => (
+            <div key={f.id} className="fwd-card animate-row" style={{ animationDelay: `${i * 0.05}s` }}>
+              <div className="fwd-card-top">
+                <div className="fwd-card-avatar">{f.name.charAt(0)}</div>
+                <div className="fwd-card-info">
+                  <h3 className="fwd-card-name">{f.name}</h3>
+                  {f.contactPerson && <p className="fwd-card-contact">{f.contactPerson}</p>}
+                </div>
+                <button
+                  className="fwd-card-delete"
+                  title="Delete forwarder"
+                  onClick={() => {
+                    if (window.confirm(`Delete "${f.name}"?`)) onDelete(f.id);
+                  }}
+                >
+                  {'\u2715'}
                 </button>
               </div>
-              {f.contactPerson && <div className="forwarder-card-detail">{'\uD83D\uDC64'} {f.contactPerson}</div>}
-              {f.email && <div className="forwarder-card-detail">{'\uD83D\uDCE7'} {f.email}</div>}
-              {f.phone && <div className="forwarder-card-detail">{'\uD83D\uDCDE'} {f.phone}</div>}
+
+              <div className="fwd-card-details">
+                {f.email && (
+                  <div className="fwd-card-detail">
+                    <span className="fwd-detail-icon">{'\uD83D\uDCE7'}</span>
+                    <span className="fwd-detail-text">{f.email}</span>
+                  </div>
+                )}
+                {f.phone && (
+                  <div className="fwd-card-detail">
+                    <span className="fwd-detail-icon">{'\uD83D\uDCDE'}</span>
+                    <span className="fwd-detail-text">{f.phone}</span>
+                  </div>
+                )}
+                {!f.email && !f.phone && (
+                  <div className="fwd-card-detail fwd-card-detail-empty">
+                    No contact details
+                  </div>
+                )}
+              </div>
             </div>
-          ))
-        )}
+          ))}
+        </div>
+      )}
+
+      <div className="forwarders-summary">
+        {forwarders.length} forwarder{forwarders.length !== 1 ? 's' : ''} registered
       </div>
     </div>
   );

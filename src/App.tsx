@@ -1,19 +1,23 @@
 import { useState, useMemo } from 'react';
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import { useStore } from './store';
+import { useAuth, AuthProvider } from './auth';
 import type { Quotation, QuotationInput, Filters } from './types';
 import Dashboard from './components/Dashboard';
 import QuotationTable from './components/QuotationTable';
 import QuotationForm from './components/QuotationForm';
 import SearchFilter from './components/SearchFilter';
 import Forwarders from './components/Forwarders';
+import LoginPage from './components/LoginPage';
 import './App.css';
 
 function AppContent() {
+  const { session, user, loading: authLoading, signOut } = useAuth();
   const { quotations, forwarders, addQuotation, updateQuotation, deleteQuotation, addForwarder, deleteForwarder, loading } = useStore();
   const [showForm, setShowForm] = useState(false);
   const [editingQuotation, setEditingQuotation] = useState<Quotation | null>(null);
   const [filters, setFilters] = useState<Filters>({ search: '', entity: '', awardedTo: '' });
+
   const filteredQuotations = useMemo(() => {
     return quotations.filter(q => {
       const searchMatch = !filters.search ||
@@ -33,6 +37,26 @@ function AppContent() {
       return searchMatch && entityMatch && statusMatch;
     });
   }, [quotations, filters]);
+
+  if (authLoading) {
+    return (
+      <div className="login-page">
+        <div className="login-bg">
+          <div className="login-bg-orb login-bg-orb-1" />
+          <div className="login-bg-orb login-bg-orb-2" />
+          <div className="login-bg-orb login-bg-orb-3" />
+        </div>
+        <div className="loading-container">
+          <div className="loading-spinner" />
+          <div className="loading-text">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <LoginPage />;
+  }
 
   const handleSave = (data: QuotationInput & { percentage: number }) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -94,6 +118,12 @@ function AppContent() {
           <button className="btn btn-primary" onClick={handleAdd}>
             + Add Quotation
           </button>
+          <div className="user-menu">
+            <span className="user-email">{user?.email}</span>
+            <button className="btn btn-signout" onClick={signOut} title="Sign out">
+              {'\uD83D\uDEAA'}
+            </button>
+          </div>
         </nav>
       </header>
 
@@ -142,7 +172,9 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </BrowserRouter>
   );
 }
