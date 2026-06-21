@@ -59,3 +59,33 @@ export const STATUS_LIST = [
 ] as const;
 
 export type StatusType = typeof STATUS_LIST[number];
+
+export interface ClientPO {
+  id: number;
+  customerName: string;
+  customerPO: string;
+  customerPOAmount: number;
+  poAmountAED: number;
+  supplierPO: string;
+  supplierName: string;
+  orderNo: string;
+  status: string;
+  remarks: string;
+}
+
+export type ClientPOInput = Omit<ClientPO, 'id'>;
+
+export const CLIENT_PO_STATUSES = [
+  'PO Received',
+  'Order Placed to Supplier',
+  'Order Ready Pick Up Scheduled',
+  'In Transit',
+  'Delivered',
+] as const;
+
+export type ClientPOStatus = typeof CLIENT_PO_STATUSES[number];
+
+export interface ClientPOFilters {
+  search: string;
+  status: string;
+}

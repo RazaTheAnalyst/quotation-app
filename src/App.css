@@ -1998,6 +1998,238 @@ form {
 /* ═══════════════════════════════════════════════
    USER MENU
    ═══════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════
+   CLIENT POs PAGE
+   ═══════════════════════════════════════════════ */
+.cpo-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cpo-hero {
+  background: linear-gradient(135deg, #78350f 0%, #92400e 40%, #b45309 100%);
+  border-radius: var(--radius-xl);
+  padding: 28px 32px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cpo-hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.cpo-hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.cpo-hero h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.cpo-hero p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.btn-nav-amber {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+}
+
+.btn-nav-amber:hover, .btn-nav-amber.active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.5);
+}
+
+/* CPO Filters */
+.cpo-table-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cpo-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cpo-search {
+  flex: 1;
+  min-width: 240px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--card-bg);
+  color: var(--text);
+  transition: var(--transition);
+}
+
+.cpo-search::placeholder { color: var(--text-muted); }
+
+.cpo-search:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.cpo-filter-select {
+  padding: 10px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--card-bg);
+  color: var(--text);
+  transition: var(--transition);
+}
+
+.cpo-filter-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.cpo-summary-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 0 4px;
+}
+
+.cpo-summary-aed {
+  font-weight: 700;
+  color: #b45309;
+}
+
+/* CPO Table Row */
+.cpo-row { cursor: pointer; }
+.cpo-row:hover { background: rgba(245, 158, 11, 0.04); }
+.cpo-row-expanded { background: rgba(245, 158, 11, 0.06); }
+
+/* CPO Status Badges */
+.status-po-received { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.status-order-placed { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+.status-ready-pickup { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+.status-cpo-transit { background: #fdf4ff; color: #86198f; border-color: #f0abfc; }
+.status-cpo-delivered { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
+
+.cpo-status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.cpo-status-badge[data-status="PO Received"] { background: #eff6ff; color: #1d4ed8; }
+.cpo-status-badge[data-status="Order Placed to Supplier"] { background: #fef3c7; color: #92400e; }
+.cpo-status-badge[data-status="Order Ready Pick Up Scheduled"] { background: #f0fdf4; color: #166534; }
+.cpo-status-badge[data-status="In Transit"] { background: #fdf4ff; color: #86198f; }
+.cpo-status-badge[data-status="Delivered"] { background: #ecfdf5; color: #065f46; }
+
+.cpo-order-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: #b45309;
+}
+
+/* CPO Expand Row */
+.cpo-expand-row td {
+  padding: 0 !important;
+}
+
+.cpo-expand-panel {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.03), rgba(251, 191, 36, 0.03));
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+  padding: 16px 20px;
+  animation: expandSlideIn 0.25s ease;
+}
+
+.cpo-expand-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cpo-expand-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.cpo-expand-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.cpo-expand-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-light);
+}
+
+.cpo-expand-card-full {
+  grid-column: 1 / -1;
+}
+
+.cpo-expand-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.cpo-expand-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.cpo-expand-value-highlight {
+  font-size: 15px;
+  font-weight: 700;
+  color: #b45309;
+}
+
+/* CPO Card Supplier */
+.cpo-card-supplier {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.cpo-card-label {
+  font-weight: 600;
+  color: var(--text-muted);
+}
 .user-menu {
   display: flex;
   align-items: center;
@@ -2327,4 +2559,23 @@ form {
   .login-title { font-size: 22px; }
   .user-email { display: none; }
   .user-menu { margin-left: 4px; padding-left: 8px; }
+}
+
+/* ═══════════════════════════════════════════════
+   CLIENT POs RESPONSIVE
+   ═══════════════════════════════════════════════ */
+@media (max-width: 1200px) {
+  .cpo-expand-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .cpo-hero { flex-direction: column; gap: 16px; align-items: flex-start; }
+  .cpo-expand-grid { grid-template-columns: 1fr; }
+  .cpo-filters { flex-direction: column; }
+  .cpo-search { min-width: auto; }
+}
+
+@media (max-width: 600px) {
+  .cpo-hero { padding: 20px; }
+  .cpo-hero h2 { font-size: 20px; }
 }
