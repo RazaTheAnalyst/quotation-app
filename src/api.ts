@@ -51,7 +51,7 @@ function rowToQuotation(row: QuotationRow): Quotation {
     percentage: row.percentage,
     etd: row.etd ?? '',
     eta: row.eta ?? '',
-    status: row.status ?? 'Sent for quotation',
+    status: row.status ?? 'Pending',
   };
 }
 
@@ -83,7 +83,7 @@ function quotationInputToRow(data: QuotationInput, percentage = 0) {
     percentage,
     etd: data.etd ?? '',
     eta: data.eta ?? '',
-    status: data.status ?? 'Sent for quotation',
+    status: data.status ?? 'Pending',
   };
 }
 

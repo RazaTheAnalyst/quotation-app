@@ -49,6 +49,7 @@ export const MODES = ['SEA FCL', 'SEA LCL', 'Air', 'Road'] as const;
 export const INCOTERMS = ['Exworks', 'FOB', 'CIF', 'DDP'] as const;
 
 export const STATUS_LIST = [
+  'Pending',
   'Sent for quotation',
   'Assign to forwarder',
   'In Transit',

@@ -25,7 +25,7 @@ const quotationSchema = z.object({
   remarks: z.string().optional().default(''),
   etd: z.string().optional().default(''),
   eta: z.string().optional().default(''),
-  status: z.string().optional().default('Sent for quotation'),
+  status: z.string().optional().default('Pending'),
 });
 
 type QuotationFormData = z.infer<typeof quotationSchema>;
@@ -56,7 +56,7 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
       remarks: quotation?.remarks ?? '',
       etd: quotation?.etd ?? '',
       eta: quotation?.eta ?? '',
-      status: quotation?.status ?? 'Sent for quotation',
+      status: quotation?.status ?? 'Pending',
     },
   });
 
