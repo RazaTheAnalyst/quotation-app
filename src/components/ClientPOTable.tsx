@@ -69,6 +69,7 @@ export default function ClientPOTable({ clientPOs, filters, onFilterChange, onEd
               <th>Customer Name</th>
               <th>Customer PO</th>
               <th className="num">Cust Amount</th>
+              <th>Cur</th>
               <th className="num">PO AED</th>
               <th>Supplier PO</th>
               <th>Supplier</th>
@@ -92,6 +93,7 @@ export default function ClientPOTable({ clientPOs, filters, onFilterChange, onEd
                   <td className="td-supplier">{cpo.customerName}</td>
                   <td className="td-mono">{cpo.customerPO}</td>
                   <td className="num td-value">{cpo.customerPOAmount > 0 ? formatCurrency(cpo.customerPOAmount) : '-'}</td>
+                  <td><span className="cpo-currency-badge">{cpo.customerPOCurrency || 'AED'}</span></td>
                   <td className="num td-value">{formatCurrency(cpo.poAmountAED)}</td>
                   <td className="td-mono">{cpo.supplierPO || '-'}</td>
                   <td>{cpo.supplierName || '-'}</td>
@@ -142,7 +144,7 @@ export default function ClientPOTable({ clientPOs, filters, onFilterChange, onEd
                           </div>
                           <div className="cpo-expand-card">
                             <div className="cpo-expand-label">Customer PO Amount</div>
-                            <div className="cpo-expand-value">{cpo.customerPOAmount > 0 ? `AED ${formatCurrency(cpo.customerPOAmount)}` : '-'}</div>
+                            <div className="cpo-expand-value">{cpo.customerPOAmount > 0 ? `${cpo.customerPOCurrency || 'AED'} ${formatCurrency(cpo.customerPOAmount)}` : '-'}</div>
                           </div>
                           <div className="cpo-expand-card">
                             <div className="cpo-expand-label">PO Amount AED</div>

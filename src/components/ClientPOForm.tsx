@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { CLIENT_PO_STATUSES } from '../types';
+import { useEffect, useState, useCallback } from 'react';
+import { CLIENT_PO_STATUSES, CURRENCIES, convertToAED } from '../types';
 import type { ClientPO, ClientPOInput } from '../types';
 
 interface ClientPOFormProps {
@@ -13,6 +13,7 @@ export default function ClientPOForm({ clientPO, onSave, onClose }: ClientPOForm
     customerName: '',
     customerPO: '',
     customerPOAmount: 0,
+    customerPOCurrency: 'AED',
     poAmountAED: 0,
     supplierPO: '',
     supplierName: '',
@@ -27,6 +28,7 @@ export default function ClientPOForm({ clientPO, onSave, onClose }: ClientPOForm
         customerName: clientPO.customerName,
         customerPO: clientPO.customerPO,
         customerPOAmount: clientPO.customerPOAmount,
+        customerPOCurrency: clientPO.customerPOCurrency || 'AED',
         poAmountAED: clientPO.poAmountAED,
         supplierPO: clientPO.supplierPO,
         supplierName: clientPO.supplierName,
@@ -37,8 +39,20 @@ export default function ClientPOForm({ clientPO, onSave, onClose }: ClientPOForm
     }
   }, [clientPO]);
 
+  const recalcAED = useCallback((amount: number, currency: string) => {
+    return convertToAED(amount, currency);
+  }, []);
+
   const handleChange = (field: keyof ClientPOInput, value: string | number) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    setForm(prev => {
+      const next = { ...prev, [field]: value };
+      if (field === 'customerPOAmount' || field === 'customerPOCurrency') {
+        const amt = field === 'customerPOAmount' ? (value as number) : prev.customerPOAmount;
+        const cur = field === 'customerPOCurrency' ? (value as string) : prev.customerPOCurrency;
+        next.poAmountAED = recalcAED(amt, cur);
+      }
+      return next;
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -46,6 +60,9 @@ export default function ClientPOForm({ clientPO, onSave, onClose }: ClientPOForm
     if (!form.customerName.trim() || !form.customerPO.trim()) return;
     onSave(form);
   };
+
+  const selectedCurrency = CURRENCIES.find(c => c.code === form.customerPOCurrency);
+  const rate = selectedCurrency?.rate ?? 1;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -100,6 +117,26 @@ export default function ClientPOForm({ clientPO, onSave, onClose }: ClientPOForm
                 />
               </div>
             </div>
+            <div className="form-grid form-grid-2" style={{ marginTop: 14 }}>
+              <div className="form-group">
+                <label htmlFor="cpo-currency">Customer PO Currency</label>
+                <select
+                  id="cpo-currency"
+                  value={form.customerPOCurrency}
+                  onChange={e => handleChange('customerPOCurrency', e.target.value)}
+                >
+                  {CURRENCIES.map(c => (
+                    <option key={c.code} value={c.code}>{c.code} - {c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Exchange Rate to AED</label>
+                <div className="cpo-rate-display">
+                  1 {form.customerPOCurrency} = {rate} AED
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="form-section">
@@ -109,7 +146,7 @@ export default function ClientPOForm({ clientPO, onSave, onClose }: ClientPOForm
             </div>
             <div className="form-grid form-grid-3">
               <div className="form-group">
-                <label htmlFor="cpo-aed">PO Amount AED</label>
+                <label htmlFor="cpo-aed">PO Amount AED (Auto-calculated)</label>
                 <input
                   id="cpo-aed"
                   type="number"
@@ -117,7 +154,8 @@ export default function ClientPOForm({ clientPO, onSave, onClose }: ClientPOForm
                   min="0"
                   placeholder="0.00"
                   value={form.poAmountAED || ''}
-                  onChange={e => handleChange('poAmountAED', parseFloat(e.target.value) || 0)}
+                  readOnly
+                  className="cpo-aed-readonly"
                 />
               </div>
               <div className="form-group">

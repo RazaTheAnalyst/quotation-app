@@ -197,6 +197,7 @@ interface ClientPORow {
   customer_name: string;
   customer_po: string;
   customer_po_amount: number;
+  customer_po_currency: string;
   po_amount_aed: number;
   supplier_po: string;
   supplier_name: string;
@@ -211,6 +212,7 @@ function rowToClientPO(row: ClientPORow): ClientPO {
     customerName: row.customer_name,
     customerPO: row.customer_po,
     customerPOAmount: row.customer_po_amount,
+    customerPOCurrency: row.customer_po_currency ?? 'AED',
     poAmountAED: row.po_amount_aed,
     supplierPO: row.supplier_po,
     supplierName: row.supplier_name,
@@ -225,6 +227,7 @@ function clientPOInputToRow(data: ClientPOInput) {
     customer_name: data.customerName,
     customer_po: data.customerPO,
     customer_po_amount: data.customerPOAmount,
+    customer_po_currency: data.customerPOCurrency || 'AED',
     po_amount_aed: data.poAmountAED,
     supplier_po: data.supplierPO,
     supplier_name: data.supplierName,
@@ -258,6 +261,7 @@ export async function updateClientPOAPI(id: number, input: Partial<ClientPOInput
   if (input.customerName !== undefined) row.customer_name = input.customerName;
   if (input.customerPO !== undefined) row.customer_po = input.customerPO;
   if (input.customerPOAmount !== undefined) row.customer_po_amount = input.customerPOAmount;
+  if (input.customerPOCurrency !== undefined) row.customer_po_currency = input.customerPOCurrency;
   if (input.poAmountAED !== undefined) row.po_amount_aed = input.poAmountAED;
   if (input.supplierPO !== undefined) row.supplier_po = input.supplierPO;
   if (input.supplierName !== undefined) row.supplier_name = input.supplierName;

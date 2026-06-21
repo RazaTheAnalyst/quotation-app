@@ -65,6 +65,7 @@ export interface ClientPO {
   customerName: string;
   customerPO: string;
   customerPOAmount: number;
+  customerPOCurrency: string;
   poAmountAED: number;
   supplierPO: string;
   supplierName: string;
@@ -74,6 +75,37 @@ export interface ClientPO {
 }
 
 export type ClientPOInput = Omit<ClientPO, 'id'>;
+
+export const CURRENCIES = [
+  { code: 'AED', name: 'UAE Dirham', rate: 1 },
+  { code: 'USD', name: 'US Dollar', rate: 3.6725 },
+  { code: 'EUR', name: 'Euro', rate: 4.015 },
+  { code: 'GBP', name: 'British Pound', rate: 4.672 },
+  { code: 'SAR', name: 'Saudi Riyal', rate: 0.9793 },
+  { code: 'QAR', name: 'Qatari Riyal', rate: 1.009 },
+  { code: 'OMR', name: 'Omani Rial', rate: 9.543 },
+  { code: 'KWD', name: 'Kuwaiti Dinar', rate: 12.034 },
+  { code: 'INR', name: 'Indian Rupee', rate: 0.04398 },
+  { code: 'PKR', name: 'Pakistani Rupee', rate: 0.01314 },
+  { code: 'CNY', name: 'Chinese Yuan', rate: 0.5055 },
+  { code: 'JPY', name: 'Japanese Yen', rate: 0.02463 },
+  { code: 'CAD', name: 'Canadian Dollar', rate: 2.698 },
+  { code: 'AUD', name: 'Australian Dollar', rate: 2.426 },
+  { code: 'CHF', name: 'Swiss Franc', rate: 4.312 },
+  { code: 'SGD', name: 'Singapore Dollar', rate: 2.775 },
+  { code: 'HKD', name: 'Hong Kong Dollar', rate: 0.4708 },
+  { code: 'MYR', name: 'Malaysian Ringgit', rate: 0.841 },
+  { code: 'THB', name: 'Thai Baht', rate: 0.1112 },
+  { code: 'PHP', name: 'Philippine Peso', rate: 0.0655 },
+] as const;
+
+export type CurrencyCode = typeof CURRENCIES[number]['code'];
+
+export function convertToAED(amount: number, currency: string): number {
+  const c = CURRENCIES.find(cur => cur.code === currency);
+  if (!c) return amount;
+  return Math.round(amount * c.rate * 100) / 100;
+}
 
 export const CLIENT_PO_STATUSES = [
   'PO Received',
