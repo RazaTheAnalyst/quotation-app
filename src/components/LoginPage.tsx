@@ -29,7 +29,7 @@ export default function LoginPage() {
 
       <div className="login-card">
         <div className="login-logo">
-          <div className="login-logo-icon">{'\uD83D\uDE9B'}</div>
+          <img src="/logo.svg" alt="Logo" className="login-logo-img" />
         </div>
 
         <h1 className="login-title">Quotation Manager</h1>
@@ -76,7 +76,10 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="login-credit">Engineered by Ali Raza</div>
+        <div className="login-credit">
+          Engineered by{' '}
+          <span className="login-credit-name">Ali Raza</span>
+        </div>
       </div>
     </div>
   );

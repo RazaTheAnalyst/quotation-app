@@ -29,10 +29,7 @@ function AppContent() {
 
       const entityMatch = !filters.entity || q.entity === filters.entity;
 
-      let statusMatch = true;
-      if (filters.awardedTo === 'awarded') statusMatch = !!q.awardedTo;
-      else if (filters.awardedTo === 'pending') statusMatch = !q.awardedTo;
-      else if (filters.awardedTo) statusMatch = q.awardedTo === filters.awardedTo;
+      const statusMatch = !filters.awardedTo || q.status === filters.awardedTo;
 
       return searchMatch && entityMatch && statusMatch;
     });
@@ -85,6 +82,10 @@ function AppContent() {
     updateQuotation(id, { awardedTo: forwarder });
   };
 
+  const handleStatusChange = (id: number, status: string) => {
+    updateQuotation(id, { status });
+  };
+
   const handleAdd = () => {
     setEditingQuotation(null);
     setShowForm(true);
@@ -104,18 +105,21 @@ function AppContent() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Quotation Manager</h1>
+        <h1>
+          <img src="/logo.svg" alt="Logo" className="header-logo" />
+          Quotation Manager
+        </h1>
         <nav className="header-actions">
-          <NavLink to="/" end className={({ isActive }) => `btn btn-tab ${isActive ? 'active' : ''}`}>
-            Dashboard
+          <NavLink to="/" end className={({ isActive }) => `btn btn-nav btn-nav-cyan ${isActive ? 'active' : ''}`}>
+            {'\uD83D\uDCCA'} Dashboard
           </NavLink>
-          <NavLink to="/quotations" className={({ isActive }) => `btn btn-tab ${isActive ? 'active' : ''}`}>
-            Quotations
+          <NavLink to="/quotations" className={({ isActive }) => `btn btn-nav btn-nav-purple ${isActive ? 'active' : ''}`}>
+            {'\uD83D\uDCCB'} Quotations
           </NavLink>
-          <NavLink to="/forwarders" className={({ isActive }) => `btn btn-tab ${isActive ? 'active' : ''}`}>
-            Forwarders
+          <NavLink to="/forwarders" className={({ isActive }) => `btn btn-nav btn-nav-green ${isActive ? 'active' : ''}`}>
+            {'\uD83D\uDE9B'} Forwarders
           </NavLink>
-          <button className="btn btn-primary" onClick={handleAdd}>
+          <button className="btn btn-nav btn-nav-pink" onClick={handleAdd}>
             + Add Quotation
           </button>
           <div className="user-menu">
@@ -129,7 +133,7 @@ function AppContent() {
 
       <main className="app-main">
         <Routes>
-          <Route path="/" element={<Dashboard quotations={quotations} />} />
+          <Route path="/" element={<Dashboard quotations={quotations} forwarders={forwarders} />} />
           <Route
             path="/quotations"
             element={
@@ -137,9 +141,11 @@ function AppContent() {
                 <SearchFilter filters={filters} onFilterChange={setFilters} />
                 <QuotationTable
                   quotations={filteredQuotations}
+                  forwarders={forwarders}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                   onAward={handleAward}
+                  onStatusChange={handleStatusChange}
                 />
               </>
             }

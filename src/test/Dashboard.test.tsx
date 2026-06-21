@@ -1,7 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import Dashboard from '../components/Dashboard';
-import type { Quotation } from '../types';
+import type { Quotation, Forwarder } from '../types';
+
+const mockForwarders: Forwarder[] = [
+  { id: 1, name: 'BDP', contactPerson: '', email: '', phone: '' },
+  { id: 2, name: 'ECU', contactPerson: '', email: '', phone: '' },
+];
 
 const mockQuotations: Quotation[] = [
   {
@@ -20,6 +25,9 @@ const mockQuotations: Quotation[] = [
     awardedTo: 'BDP',
     remarks: '',
     percentage: 15,
+    etd: '',
+    eta: '',
+    status: 'Delivered',
   },
   {
     id: 2,
@@ -37,39 +45,42 @@ const mockQuotations: Quotation[] = [
     awardedTo: '',
     remarks: '',
     percentage: 15,
+    etd: '',
+    eta: '',
+    status: 'Sent for quotation',
   },
 ];
 
 describe('Dashboard', () => {
   it('renders total POs count', () => {
-    render(<Dashboard quotations={mockQuotations} />);
+    render(<Dashboard quotations={mockQuotations} forwarders={mockForwarders} />);
     expect(screen.getByText('Total POs')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
   it('renders awarded and pending counts', () => {
-    render(<Dashboard quotations={mockQuotations} />);
+    render(<Dashboard quotations={mockQuotations} forwarders={mockForwarders} />);
     expect(screen.getByText('Awarded')).toBeInTheDocument();
     expect(screen.getAllByText('1').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('Pending')).toBeInTheDocument();
   });
 
   it('renders forwarder stats', () => {
-    render(<Dashboard quotations={mockQuotations} />);
+    render(<Dashboard quotations={mockQuotations} forwarders={mockForwarders} />);
     expect(screen.getByText('Forwarder Performance')).toBeInTheDocument();
     expect(screen.getByText('BDP')).toBeInTheDocument();
     expect(screen.getByText('ECU')).toBeInTheDocument();
   });
 
   it('renders entity stats', () => {
-    render(<Dashboard quotations={mockQuotations} />);
+    render(<Dashboard quotations={mockQuotations} forwarders={mockForwarders} />);
     expect(screen.getByText('By Entity')).toBeInTheDocument();
     expect(screen.getByText('UAE')).toBeInTheDocument();
     expect(screen.getByText('Qatar')).toBeInTheDocument();
   });
 
   it('formats currency values correctly', () => {
-    render(<Dashboard quotations={mockQuotations} />);
+    render(<Dashboard quotations={mockQuotations} forwarders={mockForwarders} />);
     expect(screen.getByText('300,000.00')).toBeInTheDocument();
   });
 });

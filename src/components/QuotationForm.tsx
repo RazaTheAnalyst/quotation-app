@@ -2,12 +2,12 @@ import { useEffect, useState, useMemo } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ENTITIES } from '../types';
+import { ENTITIES, STATUS_LIST } from '../types';
 import type { Quotation, Forwarder } from '../types';
 import { COUNTRIES, INCOTERMS_LIST, MODES_LIST } from '../locations';
 
 const quotationSchema = z.object({
-  entity: z.enum(['UAE', 'Qatar']),
+  entity: z.enum(['UAE', 'Qatar', 'Oman', 'KSA']),
   supplierName: z.string().min(1, 'Supplier name is required'),
   supplierPO: z.string().min(1, 'PO number is required'),
   poValue: z.coerce.number().positive('PO value must be greater than 0'),
@@ -23,6 +23,9 @@ const quotationSchema = z.object({
   })),
   awardedTo: z.string().optional().default(''),
   remarks: z.string().optional().default(''),
+  etd: z.string().optional().default(''),
+  eta: z.string().optional().default(''),
+  status: z.string().optional().default('Sent for quotation'),
 });
 
 type QuotationFormData = z.infer<typeof quotationSchema>;
@@ -38,7 +41,7 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
   const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<QuotationFormData>({
     resolver: zodResolver(quotationSchema),
     defaultValues: {
-      entity: (quotation?.entity as 'UAE' | 'Qatar') ?? 'UAE',
+      entity: (quotation?.entity as 'UAE' | 'Qatar' | 'Oman' | 'KSA') ?? 'UAE',
       supplierName: quotation?.supplierName ?? '',
       supplierPO: quotation?.supplierPO ?? '',
       poValue: quotation?.poValue ?? 0,
@@ -51,6 +54,9 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
       quotes: quotation?.quotes ?? forwarders.map(f => ({ forwarder: f.name, quotedAmount: 0 })),
       awardedTo: quotation?.awardedTo ?? '',
       remarks: quotation?.remarks ?? '',
+      etd: quotation?.etd ?? '',
+      eta: quotation?.eta ?? '',
+      status: quotation?.status ?? 'Sent for quotation',
     },
   });
 
@@ -262,6 +268,14 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
                 <label htmlFor="transitTime">{'\u23F1\uFE0F'} Transit Time</label>
                 <input id="transitTime" type="text" placeholder="e.g. 30 Days" {...register('transitTime')} />
               </div>
+              <div className="form-group">
+                <label htmlFor="etd">{'\u2693\uFE0F'} ETD</label>
+                <input id="etd" type="date" {...register('etd')} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="eta">{'\uD83D\uDCCD'} ETA</label>
+                <input id="eta" type="date" {...register('eta')} />
+              </div>
             </div>
           </div>
 
@@ -316,6 +330,12 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
               <span>Award & Remarks</span>
             </div>
             <div className="form-grid form-grid-3">
+              <div className="form-group">
+                <label htmlFor="status">{'\uD83D\uDCCA'} Status</label>
+                <select id="status" {...register('status')}>
+                  {STATUS_LIST.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
               <div className="form-group">
                 <label htmlFor="awardedTo">{'\u2B50'} Awarded To</label>
                 <select id="awardedTo" {...register('awardedTo')}>

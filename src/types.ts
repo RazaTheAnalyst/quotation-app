@@ -27,6 +27,9 @@ export interface Quotation {
   awardedTo: string;
   remarks: string;
   percentage: number;
+  etd: string;
+  eta: string;
+  status: string;
 }
 
 export type QuotationInput = Omit<Quotation, 'id' | 'percentage'>;
@@ -39,8 +42,19 @@ export interface Filters {
 
 export const FORWARDERS = ['BDP', 'ECU', 'Expeditors'] as const;
 
-export const ENTITIES = ['UAE', 'Qatar'] as const;
+export const ENTITIES = ['UAE', 'Qatar', 'Oman', 'KSA'] as const;
 
 export const MODES = ['SEA FCL', 'SEA LCL', 'Air', 'Road'] as const;
 
 export const INCOTERMS = ['Exworks', 'FOB', 'CIF', 'DDP'] as const;
+
+export const STATUS_LIST = [
+  'Sent for quotation',
+  'Assign to forwarder',
+  'In Transit',
+  'Arrived Awaiting clearence',
+  'Under Clearence',
+  'Delivered',
+] as const;
+
+export type StatusType = typeof STATUS_LIST[number];

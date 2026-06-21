@@ -1,8 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import QuotationTable from '../components/QuotationTable';
-import type { Quotation } from '../types';
+import type { Quotation, Forwarder } from '../types';
+
+const mockForwarders: Forwarder[] = [
+  { id: 1, name: 'BDP', contactPerson: '', email: '', phone: '' },
+  { id: 2, name: 'ECU', contactPerson: '', email: '', phone: '' },
+];
 
 const mockQuotations: Quotation[] = [
   {
@@ -21,6 +26,9 @@ const mockQuotations: Quotation[] = [
     awardedTo: 'BDP',
     remarks: 'Test remark',
     percentage: 15,
+    etd: '',
+    eta: '',
+    status: 'Delivered',
   },
 ];
 
@@ -40,12 +48,16 @@ const pendingQuotation: Quotation = {
   awardedTo: '',
   remarks: 'Test remark',
   percentage: 15,
+  etd: '',
+  eta: '',
+  status: 'Sent for quotation',
 };
 
 describe('QuotationTable', () => {
   const mockOnEdit = vi.fn();
   const mockOnDelete = vi.fn();
   const mockOnAward = vi.fn();
+  const mockOnStatusChange = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -55,24 +67,28 @@ describe('QuotationTable', () => {
     render(
       <QuotationTable
         quotations={mockQuotations}
+        forwarders={mockForwarders}
         onEdit={mockOnEdit}
         onDelete={mockOnDelete}
         onAward={mockOnAward}
+        onStatusChange={mockOnStatusChange}
       />
     );
     expect(screen.getByText('Entity')).toBeInTheDocument();
     expect(screen.getByText('Supplier')).toBeInTheDocument();
     expect(screen.getByText('PO Value')).toBeInTheDocument();
-    expect(screen.getByText('Actions')).toBeInTheDocument();
+    expect(screen.getByText('Remarks')).toBeInTheDocument();
   });
 
   it('renders quotation data in desktop table', () => {
     render(
       <QuotationTable
         quotations={mockQuotations}
+        forwarders={mockForwarders}
         onEdit={mockOnEdit}
         onDelete={mockOnDelete}
         onAward={mockOnAward}
+        onStatusChange={mockOnStatusChange}
       />
     );
     const desktopTable = document.querySelector('.table-container.desktop-only');
@@ -85,9 +101,11 @@ describe('QuotationTable', () => {
     render(
       <QuotationTable
         quotations={[]}
+        forwarders={mockForwarders}
         onEdit={mockOnEdit}
         onDelete={mockOnDelete}
         onAward={mockOnAward}
+        onStatusChange={mockOnStatusChange}
       />
     );
     expect(screen.getAllByText('No quotations found').length).toBe(2);
@@ -98,12 +116,17 @@ describe('QuotationTable', () => {
     render(
       <QuotationTable
         quotations={mockQuotations}
+        forwarders={mockForwarders}
         onEdit={mockOnEdit}
         onDelete={mockOnDelete}
         onAward={mockOnAward}
+        onStatusChange={mockOnStatusChange}
       />
     );
-    const editButton = screen.getAllByTitle('Edit')[0]!;
+    const row = document.querySelector('.quote-row')!;
+    await user.click(row);
+    const expandPanel = row.nextElementSibling!;
+    const editButton = within(expandPanel).getByRole('button', { name: /edit/i });
     await user.click(editButton);
     expect(mockOnEdit).toHaveBeenCalledWith(mockQuotations[0]);
   });
@@ -113,12 +136,17 @@ describe('QuotationTable', () => {
     render(
       <QuotationTable
         quotations={mockQuotations}
+        forwarders={mockForwarders}
         onEdit={mockOnEdit}
         onDelete={mockOnDelete}
         onAward={mockOnAward}
+        onStatusChange={mockOnStatusChange}
       />
     );
-    const deleteButton = screen.getAllByTitle('Delete')[0]!;
+    const row = document.querySelector('.quote-row')!;
+    await user.click(row);
+    const expandPanel = row.nextElementSibling!;
+    const deleteButton = within(expandPanel).getByRole('button', { name: /delete/i });
     await user.click(deleteButton);
     expect(mockOnDelete).toHaveBeenCalledWith(1);
   });
@@ -127,9 +155,11 @@ describe('QuotationTable', () => {
     render(
       <QuotationTable
         quotations={mockQuotations}
+        forwarders={mockForwarders}
         onEdit={mockOnEdit}
         onDelete={mockOnDelete}
         onAward={mockOnAward}
+        onStatusChange={mockOnStatusChange}
       />
     );
     expect(screen.getAllByText('BDP').length).toBeGreaterThanOrEqual(1);
@@ -139,11 +169,13 @@ describe('QuotationTable', () => {
     render(
       <QuotationTable
         quotations={[pendingQuotation]}
+        forwarders={mockForwarders}
         onEdit={mockOnEdit}
         onDelete={mockOnDelete}
         onAward={mockOnAward}
+        onStatusChange={mockOnStatusChange}
       />
     );
-    expect(screen.getAllByText('Pending').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Sent for quotation').length).toBeGreaterThanOrEqual(1);
   });
 });

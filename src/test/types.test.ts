@@ -7,7 +7,7 @@ describe('Types constants', () => {
   });
 
   it('has correct entities', () => {
-    expect(ENTITIES).toEqual(['UAE', 'Qatar']);
+    expect(ENTITIES).toEqual(['UAE', 'Qatar', 'Oman', 'KSA']);
   });
 
   it('has correct modes', () => {

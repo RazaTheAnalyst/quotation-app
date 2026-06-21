@@ -1,11 +1,12 @@
-import { ENTITIES, FORWARDERS } from '../types';
-import type { Quotation } from '../types';
+import { ENTITIES } from '../types';
+import type { Quotation, Forwarder } from '../types';
 
 interface DashboardProps {
   quotations: Quotation[];
+  forwarders: Forwarder[];
 }
 
-export default function Dashboard({ quotations }: DashboardProps) {
+export default function Dashboard({ quotations, forwarders }: DashboardProps) {
   const totalPOValue = quotations.reduce((sum, q) => sum + q.poValue, 0);
   const totalQuotations = quotations.length;
   const awardedCount = quotations.filter(q => q.awardedTo).length;
@@ -22,7 +23,9 @@ export default function Dashboard({ quotations }: DashboardProps) {
     ? ((totalFreightSpending / totalPOValue) * 100).toFixed(1)
     : '0.0';
 
-  const forwarderStats = FORWARDERS.map(f => {
+  const forwarderNames = forwarders.map(f => f.name);
+
+  const forwarderStats = forwarderNames.map(f => {
     const awarded = quotations.filter(q => q.awardedTo === f);
     const totalValue = awarded.reduce((sum, q) => {
       const quote = q.quotes.find(qu => qu.forwarder === f);
@@ -45,12 +48,6 @@ export default function Dashboard({ quotations }: DashboardProps) {
 
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
-
-  const getForwarderClass = (f: string) => {
-    if (f === 'BDP') return 'bdp';
-    if (f === 'ECU') return 'ecu';
-    return 'expeditors';
-  };
 
   return (
     <div className="dashboard">
@@ -112,7 +109,7 @@ export default function Dashboard({ quotations }: DashboardProps) {
                 </div>
                 <div className="forwarder-bar-track">
                   <div
-                    className={`forwarder-bar-fill ${getForwarderClass(f.forwarder)}`}
+                    className="forwarder-bar-fill"
                     style={{ width: `${(f.totalValue / maxForwarderValue) * 100}%` }}
                   />
                 </div>
@@ -125,7 +122,7 @@ export default function Dashboard({ quotations }: DashboardProps) {
           <h3>By Entity</h3>
           <div className="entity-cards">
             {entityStats.map(e => (
-              <div key={e.entity} className={`entity-card ${e.entity === 'UAE' ? 'ua' : 'qatar'}`}>
+              <div key={e.entity} className={`entity-card entity-${e.entity.toLowerCase()}`}>
                 <div className="entity-card-header">
                   <span className="entity-card-name">{e.entity}</span>
                   <span className="entity-card-count">{e.count} POs</span>

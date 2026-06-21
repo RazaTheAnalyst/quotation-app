@@ -20,6 +20,9 @@ export const initialData: Quotation[] = [
     awardedTo: 'Expeditors',
     remarks: 'Collected ETA 07-07-2026',
     percentage: 10.62,
+    etd: '',
+    eta: '2026-07-07',
+    status: 'Delivered',
   },
   {
     id: 2,
@@ -40,6 +43,9 @@ export const initialData: Quotation[] = [
     awardedTo: 'Expeditors',
     remarks: 'ETD 27-06-2026 ETA 07-08-2026',
     percentage: 18.15,
+    etd: '2026-06-27',
+    eta: '2026-08-07',
+    status: 'In Transit',
   },
   {
     id: 3,
@@ -60,6 +66,9 @@ export const initialData: Quotation[] = [
     awardedTo: 'Expeditors',
     remarks: '',
     percentage: 17.86,
+    etd: '',
+    eta: '',
+    status: 'Assign to forwarder',
   },
   {
     id: 4,
@@ -80,6 +89,9 @@ export const initialData: Quotation[] = [
     awardedTo: '',
     remarks: '',
     percentage: 15.99,
+    etd: '',
+    eta: '',
+    status: 'Sent for quotation',
   },
   {
     id: 5,
@@ -100,6 +112,9 @@ export const initialData: Quotation[] = [
     awardedTo: 'Expeditors',
     remarks: '',
     percentage: 8.40,
+    etd: '',
+    eta: '',
+    status: 'Under Clearence',
   },
   {
     id: 6,
@@ -120,6 +135,9 @@ export const initialData: Quotation[] = [
     awardedTo: '',
     remarks: '',
     percentage: 19.82,
+    etd: '',
+    eta: '',
+    status: 'Sent for quotation',
   },
   {
     id: 7,
@@ -140,5 +158,8 @@ export const initialData: Quotation[] = [
     awardedTo: '',
     remarks: '',
     percentage: 4.90,
+    etd: '',
+    eta: '',
+    status: 'Arrived Awaiting clearence',
   },
 ];

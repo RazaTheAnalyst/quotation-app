@@ -1,0 +1,24 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 3D Container Shape (Isometric-ish) -->
+  <!-- Top Face -->
+  <path d="M70 50 L160 50 L140 70 L50 70 Z" fill="#2C5282" opacity="0.8"/>
+  <!-- Front Face -->
+  <path d="M50 70 L140 70 L140 130 L50 130 Z" fill="#1A365D"/>
+  <!-- Side Face -->
+  <path d="M140 70 L160 50 L160 110 L140 130 Z" fill="#152C4D"/>
+
+  <!-- Corrugation Lines on Front Face -->
+  <line x1="65" y1="75" x2="65" y2="125" stroke="white" stroke-width="3" stroke-opacity="0.1"/>
+  <line x1="80" y1="75" x2="80" y2="125" stroke="white" stroke-width="3" stroke-opacity="0.1"/>
+  <line x1="95" y1="75" x2="95" y2="125" stroke="white" stroke-width="3" stroke-opacity="0.1"/>
+  <line x1="110" y1="75" x2="110" y2="125" stroke="white" stroke-width="3" stroke-opacity="0.1"/>
+  <line x1="125" y1="75" x2="125" y2="125" stroke="white" stroke-width="3" stroke-opacity="0.1"/>
+
+  <!-- Stylized L (Framing the front face) -->
+  <path d="M60 70 V120 H130" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- 3D Checkmark sitting on the front plane -->
+  <path d="M90 95 L110 115 L155 70" stroke="#63B3ED" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <title>Checkmark</title>
+  </path>
+</svg>

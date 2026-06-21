@@ -29,8 +29,8 @@ describe('SearchFilter', () => {
   it('renders status dropdown with options', () => {
     render(<SearchFilter filters={defaultFilters} onFilterChange={mockOnChange} />);
     expect(screen.getByText('All Status')).toBeInTheDocument();
-    expect(screen.getByText('Awarded')).toBeInTheDocument();
-    expect(screen.getByText('Pending')).toBeInTheDocument();
+    expect(screen.getByText('Sent for quotation')).toBeInTheDocument();
+    expect(screen.getByText('Delivered')).toBeInTheDocument();
   });
 
   it('calls onFilterChange when search input changes', async () => {

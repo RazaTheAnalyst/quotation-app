@@ -1,4 +1,4 @@
-import { ENTITIES, FORWARDERS } from '../types';
+import { ENTITIES, STATUS_LIST } from '../types';
 import type { Filters } from '../types';
 
 interface SearchFilterProps {
@@ -25,9 +25,7 @@ export default function SearchFilter({ filters, onFilterChange }: SearchFilterPr
       </select>
       <select value={filters.awardedTo} onChange={(e) => handleChange('awardedTo', e.target.value)}>
         <option value="">All Status</option>
-        <option value="awarded">Awarded</option>
-        <option value="pending">Pending</option>
-        {FORWARDERS.map(f => <option key={f} value={f}>Awarded to {f}</option>)}
+        {STATUS_LIST.map(s => <option key={s} value={s}>{s}</option>)}
       </select>
     </div>
   );
