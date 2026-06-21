@@ -112,6 +112,7 @@ export const CLIENT_PO_STATUSES = [
   'Order Placed to Supplier',
   'Order Ready Pick Up Scheduled',
   'In Transit',
+  'Partially Delivered',
   'Delivered',
 ] as const;
 

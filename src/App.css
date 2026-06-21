@@ -2166,6 +2166,7 @@ form {
 .status-order-placed { background: #fef3c7; color: #92400e; border-color: #fde68a; }
 .status-ready-pickup { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
 .status-cpo-transit { background: #fdf4ff; color: #86198f; border-color: #f0abfc; }
+.status-cpo-partial { background: #fff7ed; color: #9a3412; border-color: #fed7aa; }
 .status-cpo-delivered { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
 
 .cpo-status-badge {
@@ -2180,6 +2181,7 @@ form {
 .cpo-status-badge[data-status="Order Placed to Supplier"] { background: #fef3c7; color: #92400e; }
 .cpo-status-badge[data-status="Order Ready Pick Up Scheduled"] { background: #f0fdf4; color: #166534; }
 .cpo-status-badge[data-status="In Transit"] { background: #fdf4ff; color: #86198f; }
+.cpo-status-badge[data-status="Partially Delivered"] { background: #fff7ed; color: #9a3412; }
 .cpo-status-badge[data-status="Delivered"] { background: #ecfdf5; color: #065f46; }
 
 .cpo-order-badge {

@@ -18,6 +18,7 @@ function getStatusClass(status: string): string {
   if (s === 'order placed to supplier') return 'status-order-placed';
   if (s === 'order ready pick up scheduled') return 'status-ready-pickup';
   if (s === 'in transit') return 'status-cpo-transit';
+  if (s === 'partially delivered') return 'status-cpo-partial';
   if (s === 'delivered') return 'status-cpo-delivered';
   return '';
 }
