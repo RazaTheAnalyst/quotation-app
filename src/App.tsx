@@ -160,20 +160,20 @@ function AppContent() {
           Quotation Manager
         </h1>
         <nav className="header-actions">
-          <NavLink to="/" end className={({ isActive }) => `btn btn-nav btn-nav-cyan ${isActive ? 'active' : ''}`}>
-            {'\uD83D\uDCCA'} Dashboard
+          <NavLink to="/" end className={({ isActive }) => `btn btn-nav ${isActive ? 'active' : ''}`}>
+            Dashboard
           </NavLink>
-          <NavLink to="/quotations" className={({ isActive }) => `btn btn-nav btn-nav-purple ${isActive ? 'active' : ''}`}>
-            {'\uD83D\uDCCB'} Quotations
+          <NavLink to="/quotations" className={({ isActive }) => `btn btn-nav ${isActive ? 'active' : ''}`}>
+            Quotations
           </NavLink>
-          <NavLink to="/forwarders" className={({ isActive }) => `btn btn-nav btn-nav-green ${isActive ? 'active' : ''}`}>
-            {'\uD83D\uDE9B'} Forwarders
+          <NavLink to="/forwarders" className={({ isActive }) => `btn btn-nav ${isActive ? 'active' : ''}`}>
+            Forwarders
           </NavLink>
-          <NavLink to="/client-pos" className={({ isActive }) => `btn btn-nav btn-nav-amber ${isActive ? 'active' : ''}`}>
-            {'\uD83D\uDCCB'} Client POs
+          <NavLink to="/client-pos" className={({ isActive }) => `btn btn-nav ${isActive ? 'active' : ''}`}>
+            Client POs
           </NavLink>
-          <button className="btn btn-nav btn-nav-pink" onClick={handleAdd}>
-            + Add Quotation
+          <button className="btn btn-nav btn-nav-add" onClick={handleAdd}>
+            Add Quotation
           </button>
           <div className="user-menu">
             <span className="user-email">{user?.email}</span>

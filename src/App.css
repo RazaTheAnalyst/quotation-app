@@ -65,7 +65,7 @@ body {
 
 /* Touch-friendly tap targets */
 button, a, select, input[type="checkbox"], input[type="radio"] {
-  min-height: 44px;
+  min-height: 40px;
 }
 
 /* Prevent text selection on interactive elements */
@@ -97,24 +97,24 @@ html, body {
 
 /* ─── Header ─── */
 .app-header {
-  background: #111827;
-  padding: 0 24px;
+  background: #0f172a;
+  padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: sticky;
   top: 0;
   z-index: 10;
-  height: 56px;
-  height: calc(56px + env(safe-area-inset-top));
+  height: 50px;
+  height: calc(50px + env(safe-area-inset-top));
   padding-top: env(safe-area-inset-top);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .app-header h1 {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
-  color: #ffffff;
+  color: #e2e8f0;
   letter-spacing: -0.02em;
   display: flex;
   align-items: center;
@@ -124,21 +124,25 @@ html, body {
 
 .header-actions {
   display: flex;
-  gap: 4px;
+  gap: 0;
   align-items: center;
   flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* ─── Buttons ─── */
 .btn {
-  padding: 8px 14px;
-  border-radius: 8px;
+  padding: 7px 14px;
+  border-radius: 7px;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   border: none;
   background: transparent;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.5);
   transition: var(--transition);
   letter-spacing: -0.01em;
 }
@@ -151,6 +155,14 @@ html, body {
 .btn-primary {
   background: #3b82f6;
   color: white;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  min-height: 38px;
+  cursor: pointer;
+  border: none;
+  transition: var(--transition);
 }
 
 .btn-primary:hover {
@@ -177,82 +189,51 @@ html, body {
 }
 
 .btn-nav {
-  padding: 7px 14px;
-  border-radius: 8px;
+  padding: 6px 14px;
+  border-radius: 7px;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.7);
+  border: none;
+  color: rgba(255, 255, 255, 0.45);
   transition: var(--transition);
   letter-spacing: -0.01em;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.04);
+  gap: 5px;
+  background: transparent;
+  min-height: 32px;
 }
 
 .btn-nav:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: #fff;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .btn-nav.active {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
   color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  font-weight: 600;
 }
 
-.btn-nav-cyan {
-  border-color: rgba(6, 182, 212, 0.3);
-  color: rgba(6, 182, 212, 0.9);
-}
-.btn-nav-cyan:hover, .btn-nav-cyan.active {
-  background: rgba(6, 182, 212, 0.12);
-  border-color: rgba(6, 182, 212, 0.4);
-  color: #06b6d4;
+.btn-nav-add {
+  background: #3b82f6;
+  color: #fff;
+  font-weight: 600;
+  margin-left: 6px;
+  border-radius: 7px;
 }
 
-.btn-nav-purple {
-  border-color: rgba(139, 92, 246, 0.3);
-  color: rgba(139, 92, 246, 0.9);
-}
-.btn-nav-purple:hover, .btn-nav-purple.active {
-  background: rgba(139, 92, 246, 0.12);
-  border-color: rgba(139, 92, 246, 0.4);
-  color: #8b5cf6;
+.btn-nav-add:hover {
+  background: #2563eb;
 }
 
-.btn-nav-green {
-  border-color: rgba(16, 185, 129, 0.3);
-  color: rgba(16, 185, 129, 0.9);
-}
-.btn-nav-green:hover, .btn-nav-green.active {
-  background: rgba(16, 185, 129, 0.12);
-  border-color: rgba(16, 185, 129, 0.4);
-  color: #10b981;
-}
-
-.btn-nav-amber {
-  border-color: rgba(245, 158, 11, 0.3);
-  color: rgba(245, 158, 11, 0.9);
-}
-.btn-nav-amber:hover, .btn-nav-amber.active {
-  background: rgba(245, 158, 11, 0.12);
-  border-color: rgba(245, 158, 11, 0.4);
-  color: #f59e0b;
-}
-
-.btn-nav-pink {
-  border-color: rgba(236, 72, 153, 0.3);
-  color: rgba(236, 72, 153, 0.9);
-}
-.btn-nav-pink:hover, .btn-nav-pink.active {
-  background: rgba(236, 72, 153, 0.12);
-  border-color: rgba(236, 72, 153, 0.4);
-  color: #ec4899;
+.btn-nav-add::before {
+  content: '+';
+  font-size: 14px;
+  font-weight: 700;
+  margin-right: 2px;
 }
 
 .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
@@ -1528,7 +1509,7 @@ form {
 }
 
 @media (max-width: 900px) {
-  .app-header { padding: 0 12px; height: 48px; height: calc(48px + env(safe-area-inset-top)); padding-top: env(safe-area-inset-top); }
+  .app-header { padding: 0 12px; height: 44px; height: calc(44px + env(safe-area-inset-top)); padding-top: env(safe-area-inset-top); }
   .app-main { padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .stats-grid-6 { grid-template-columns: 1fr 1fr; }
@@ -1537,21 +1518,22 @@ form {
   .dashboard-hero { padding: 24px; }
   .dashboard-hero h2 { font-size: 22px; }
   .card-quotes { grid-template-columns: 1fr; }
-  .header-actions { gap: 2px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; flex-wrap: nowrap; }
+  .header-actions { gap: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; flex-wrap: nowrap; }
   .header-actions::-webkit-scrollbar { display: none; }
-  .btn-nav { padding: 6px 10px; font-size: 11px; }
-  .app-header h1 { font-size: 14px; }
+  .btn-nav { padding: 5px 10px; font-size: 11px; }
+  .app-header h1 { font-size: 13px; }
 }
 
 @media (max-width: 600px) {
   .stats-grid { grid-template-columns: 1fr; }
   .stats-grid-6 { grid-template-columns: 1fr; }
   .entity-cards { grid-template-columns: 1fr; }
-  .header-actions { gap: 1px; padding-right: 0; }
-  .btn { padding: 6px 8px; font-size: 11px; }
+  .header-actions { padding: 2px; }
+  .btn { padding: 5px 8px; font-size: 11px; }
   .btn-nav { padding: 5px 8px; font-size: 10px; gap: 3px; }
-  .app-header h1 { font-size: 13px; gap: 6px; }
-  .header-logo { width: 24px; height: 24px; }
+  .btn-nav-add { font-size: 10px; padding: 5px 10px; margin-left: 4px; }
+  .app-header h1 { font-size: 12px; gap: 6px; }
+  .header-logo { width: 22px; height: 22px; }
   .login-card { margin: 16px; }
   .modal { width: 96%; max-height: 94vh; }
   .app-main { padding: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
