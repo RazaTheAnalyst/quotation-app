@@ -1,4 +1,5 @@
 import { Fragment, useState } from 'react';
+import * as XLSX from 'xlsx';
 import { STATUS_LIST } from '../types';
 import type { Quotation, Forwarder } from '../types';
 
@@ -16,6 +17,36 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
 
   const fmt = (val: number) =>
     new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
+
+  const exportToExcel = () => {
+    const data = quotations.map(q => ({
+      Entity: q.entity,
+      Supplier: q.supplierName,
+      'PO Number': q.supplierPO,
+      'PO Value (AED)': q.poValue,
+      Origin: q.origin,
+      Destination: q.destination,
+      Mode: q.mode,
+      Size: q.size,
+      'Transit Time': q.transitTime,
+      ETD: q.etd,
+      ETA: q.eta,
+      Incoterms: q.incoterms,
+      Status: q.status,
+      'Freight %': q.percentage,
+      Remarks: q.remarks,
+      'Awarded To': q.awardedTo || '-',
+      ...forwarders.reduce((acc, f) => {
+        const quote = q.quotes.find(qu => qu.forwarder === f.name);
+        acc[f.name] = quote?.quotedAmount || 0;
+        return acc;
+      }, {} as Record<string, number>),
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Quotations');
+    XLSX.writeFile(wb, `Quotations_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
 
   const toggleRow = (id: number) => {
     setExpandedRows(prev => {
@@ -49,6 +80,11 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
 
   return (
     <>
+      <div className="table-toolbar">
+        <button className="btn btn-export" onClick={exportToExcel}>
+          {'\uD83D\uDCE5'} Export Excel
+        </button>
+      </div>
       {/* Desktop Table */}
       <div className="table-container desktop-only">
         <table>

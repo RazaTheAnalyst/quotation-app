@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import * as XLSX from 'xlsx';
 import { CLIENT_PO_STATUSES } from '../types';
 import type { ClientPO, ClientPOFilters } from '../types';
 
@@ -33,6 +34,25 @@ export default function ClientPOTable({ clientPOs, filters, onFilterChange, onEd
 
   const totalAED = clientPOs.reduce((s, c) => s + c.poAmountAED, 0);
 
+  const exportToExcel = () => {
+    const data = clientPOs.map(cpo => ({
+      'Customer Name': cpo.customerName,
+      'Customer PO': cpo.customerPO,
+      'Customer PO Amount': cpo.customerPOAmount,
+      'Currency': cpo.customerPOCurrency || 'AED',
+      'PO Amount AED': cpo.poAmountAED,
+      'Supplier PO': cpo.supplierPO || '-',
+      'Supplier Name': cpo.supplierName || '-',
+      'Order No': cpo.orderNo || '-',
+      Status: cpo.status,
+      Remarks: cpo.remarks || '-',
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Client POs');
+    XLSX.writeFile(wb, `ClientPOs_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
   return (
     <div className="cpo-table-wrapper">
       <div className="cpo-filters">
@@ -57,7 +77,12 @@ export default function ClientPOTable({ clientPOs, filters, onFilterChange, onEd
 
       <div className="cpo-summary-bar">
         <span>{clientPOs.length} order{clientPOs.length !== 1 ? 's' : ''}</span>
-        <span className="cpo-summary-aed">Total: AED {formatCurrency(totalAED)}</span>
+        <div className="cpo-summary-right">
+          <span className="cpo-summary-aed">Total: AED {formatCurrency(totalAED)}</span>
+          <button className="btn btn-export" onClick={exportToExcel}>
+            {'\uD83D\uDCE5'} Export Excel
+          </button>
+        </div>
       </div>
 
       {/* Desktop Table */}
