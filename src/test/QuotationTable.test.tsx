@@ -125,7 +125,7 @@ describe('QuotationTable', () => {
     );
     const row = document.querySelector('.quote-row')!;
     await user.click(row);
-    const expandPanel = row.nextElementSibling!;
+    const expandPanel = row.nextElementSibling as HTMLElement;
     const editButton = within(expandPanel).getByRole('button', { name: /edit/i });
     await user.click(editButton);
     expect(mockOnEdit).toHaveBeenCalledWith(mockQuotations[0]);
@@ -145,7 +145,7 @@ describe('QuotationTable', () => {
     );
     const row = document.querySelector('.quote-row')!;
     await user.click(row);
-    const expandPanel = row.nextElementSibling!;
+    const expandPanel = row.nextElementSibling as HTMLElement;
     const deleteButton = within(expandPanel).getByRole('button', { name: /delete/i });
     await user.click(deleteButton);
     expect(mockOnDelete).toHaveBeenCalledWith(1);
