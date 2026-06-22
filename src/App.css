@@ -292,8 +292,7 @@ html, body {
 /* ─── Main ─── */
 .app-main {
   padding: 28px 32px;
-  max-width: 1600px;
-  margin: 0 auto;
+  max-width: 100%;
 }
 
 /* ─── Search Filter ─── */
@@ -336,9 +335,10 @@ html, body {
 .table-container {
   overflow-x: auto;
   background: var(--card-bg);
-  border-radius: var(--radius-lg);
   border: 1px solid var(--border-light);
   box-shadow: var(--card-shadow);
+  margin: 0 -20px;
+  width: calc(100% + 40px);
 }
 
 table {
@@ -608,55 +608,60 @@ tr:hover {
 }
 
 .quotes-expand-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .quotes-expand-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
   background: var(--card-bg);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
+  border-radius: 6px;
+  padding: 6px 12px;
   border: 1px solid var(--border-light);
   transition: var(--transition);
 }
 
 .quotes-expand-card.awarded {
   border-color: var(--success);
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.04), rgba(34, 197, 94, 0.04));
+  background: rgba(16, 185, 129, 0.06);
 }
 
 .quotes-expand-card.not-awarded {
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 .quotes-expand-card-name {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 4px;
   letter-spacing: -0.01em;
 }
 
 .quotes-expand-card-amount {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text-primary);
-  letter-spacing: -0.02em;
-  margin-bottom: 8px;
+  letter-spacing: -0.01em;
 }
 
 .quotes-expand-card.awarded .quotes-expand-card-amount {
   color: var(--success);
 }
 
+.quotes-expand-card .btn-award-expand {
+  margin-left: 4px;
+}
+
 .btn-award-expand {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 14px;
-  border-radius: 16px;
-  font-size: 12px;
+  gap: 3px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   border: 1px solid var(--border-light);
@@ -1546,12 +1551,11 @@ form {
   .td-mono { font-size: 11px; }
   .td-value { font-size: 12px; }
   .td-supplier { font-size: 12px; max-width: 110px; }
-  .quotes-expand-panel { padding: 12px 14px; }
-  .quotes-expand-card { padding: 10px 12px; border-radius: var(--radius-sm); }
-  .quotes-expand-card-name { font-size: 12px; }
-  .quotes-expand-card-amount { font-size: 17px; margin-bottom: 8px; }
-  .quotes-expand-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
-  .btn-award-expand { padding: 4px 10px; font-size: 11px; }
+  .quotes-expand-panel { padding: 10px 14px; }
+  .quotes-expand-card { padding: 5px 10px; gap: 8px; }
+  .quotes-expand-card-name { font-size: 11px; }
+  .quotes-expand-card-amount { font-size: 12px; }
+  .btn-award-expand { padding: 2px 8px; font-size: 10px; }
   .th-date { min-width: 75px; font-size: 10px; }
 }
 
@@ -1586,13 +1590,12 @@ form {
   .th-po { min-width: 65px; }
   .th-remarks { min-width: 100px; }
   .td-remarks { font-size: 10px; max-width: 120px; }
-  .quotes-expand-panel { padding: 10px 12px; }
+  .quotes-expand-panel { padding: 8px 10px; }
   .quotes-expand-title { font-size: 11px; }
-  .quotes-expand-card { padding: 8px 10px; }
-  .quotes-expand-card-name { font-size: 11px; }
-  .quotes-expand-card-amount { font-size: 15px; margin-bottom: 6px; }
-  .quotes-expand-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
-  .btn-award-expand { padding: 3px 8px; font-size: 10px; }
+  .quotes-expand-card { padding: 4px 8px; gap: 6px; }
+  .quotes-expand-card-name { font-size: 10px; }
+  .quotes-expand-card-amount { font-size: 11px; }
+  .btn-award-expand { padding: 2px 7px; font-size: 9px; }
   .search-filter { gap: 8px; }
   .search-filter input, .search-filter select { padding: 8px 12px; font-size: 13px; }
 }
