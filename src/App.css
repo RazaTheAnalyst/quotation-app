@@ -46,7 +46,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
@@ -579,7 +579,7 @@ tr:hover {
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.03), rgba(6, 182, 212, 0.03));
   border-top: 1px solid var(--border-light);
   border-bottom: 1px solid var(--border-light);
-  padding: 16px 20px;
+  padding: 12px 16px;
   animation: expandSlideIn 0.25s ease;
 }
 
@@ -592,7 +592,7 @@ tr:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .quotes-expand-title {
@@ -609,14 +609,14 @@ tr:hover {
 
 .quotes-expand-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
 }
 
 .quotes-expand-card {
   background: var(--card-bg);
-  border-radius: var(--radius-md);
-  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
   border: 1px solid var(--border-light);
   transition: var(--transition);
 }
@@ -631,19 +631,19 @@ tr:hover {
 }
 
 .quotes-expand-card-name {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   letter-spacing: -0.01em;
 }
 
 .quotes-expand-card-amount {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.02em;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .quotes-expand-card.awarded .quotes-expand-card-amount {
@@ -1501,13 +1501,28 @@ form {
 /* ═══════════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════════ */
+
+/* Large screens (1400px+) - full size table */
+@media (min-width: 1400px) {
+  table { font-size: 14px; }
+  th { padding: 14px 12px; font-size: 12px; }
+  td { padding: 12px 12px; }
+  .quotes-expand-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+}
+
+/* Medium-large (1200px) */
 @media (max-width: 1200px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .stats-grid-6 { grid-template-columns: repeat(3, 1fr); }
   .dashboard-sections { grid-template-columns: 1fr; }
   .form-grid-3 { grid-template-columns: repeat(2, 1fr); }
+  table { font-size: 13px; }
+  th { padding: 12px 10px; font-size: 11px; }
+  td { padding: 10px 8px; }
+  .quotes-expand-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
 }
 
+/* Medium (900px) - tighter table */
 @media (max-width: 900px) {
   .app-header { padding: 0 12px; height: 44px; height: calc(44px + env(safe-area-inset-top)); padding-top: env(safe-area-inset-top); }
   .app-main { padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
@@ -1522,8 +1537,25 @@ form {
   .header-actions::-webkit-scrollbar { display: none; }
   .btn-nav { padding: 5px 10px; font-size: 11px; }
   .app-header h1 { font-size: 13px; }
+  table { font-size: 12px; }
+  th { padding: 10px 8px; font-size: 10px; }
+  td { padding: 9px 7px; }
+  .entity-badge { font-size: 10px; padding: 2px 8px; }
+  .mode-tag, .inco-tag { font-size: 11px; padding: 2px 7px; }
+  .status-select { font-size: 11px; padding: 4px 7px; }
+  .td-mono { font-size: 11px; }
+  .td-value { font-size: 12px; }
+  .td-supplier { font-size: 12px; max-width: 110px; }
+  .quotes-expand-panel { padding: 12px 14px; }
+  .quotes-expand-card { padding: 10px 12px; border-radius: var(--radius-sm); }
+  .quotes-expand-card-name { font-size: 12px; }
+  .quotes-expand-card-amount { font-size: 17px; margin-bottom: 8px; }
+  .quotes-expand-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+  .btn-award-expand { padding: 4px 10px; font-size: 11px; }
+  .th-date { min-width: 75px; font-size: 10px; }
 }
 
+/* Small (600px) - compact table + hide some columns */
 @media (max-width: 600px) {
   .stats-grid { grid-template-columns: 1fr; }
   .stats-grid-6 { grid-template-columns: 1fr; }
@@ -1538,6 +1570,31 @@ form {
   .modal { width: 96%; max-height: 94vh; }
   .app-main { padding: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
   .user-email { display: none; }
+  table { font-size: 11px; }
+  th { padding: 8px 6px; font-size: 9px; letter-spacing: 0.04em; }
+  td { padding: 8px 6px; }
+  .entity-badge { font-size: 9px; padding: 2px 6px; }
+  .mode-tag, .inco-tag { font-size: 10px; padding: 1px 5px; }
+  .status-select { font-size: 10px; padding: 3px 5px; }
+  .td-mono { font-size: 10px; }
+  .td-value { font-size: 11px; }
+  .td-supplier { font-size: 11px; max-width: 90px; }
+  .td-date { font-size: 10px; }
+  .date-tag { font-size: 10px; padding: 2px 6px; }
+  .th-quote { min-width: 55px; }
+  .th-value { min-width: 70px; }
+  .th-po { min-width: 65px; }
+  .th-remarks { min-width: 100px; }
+  .td-remarks { font-size: 10px; max-width: 120px; }
+  .quotes-expand-panel { padding: 10px 12px; }
+  .quotes-expand-title { font-size: 11px; }
+  .quotes-expand-card { padding: 8px 10px; }
+  .quotes-expand-card-name { font-size: 11px; }
+  .quotes-expand-card-amount { font-size: 15px; margin-bottom: 6px; }
+  .quotes-expand-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .btn-award-expand { padding: 3px 8px; font-size: 10px; }
+  .search-filter { gap: 8px; }
+  .search-filter input, .search-filter select { padding: 8px 12px; font-size: 13px; }
 }
 
 /* ═══════════════════════════════════════════════
