@@ -236,7 +236,7 @@ html, body {
   margin-right: 2px;
 }
 
-.btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
+.btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 6px; }
 
 .btn-edit {
   color: var(--primary);
@@ -309,7 +309,7 @@ html, body {
   padding: 10px 16px;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
-  font-size: 13px;
+  font-size: 14px;
   font-family: inherit;
   background: var(--card-bg);
   color: var(--text);
@@ -331,7 +331,7 @@ html, body {
 }
 
 /* ═══════════════════════════════════════════════
-   TABLE - Desktop Compact
+   TABLE - Desktop
    ═══════════════════════════════════════════════ */
 .table-container {
   overflow-x: auto;
@@ -344,17 +344,17 @@ html, body {
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 th {
   background: linear-gradient(180deg, #f9fafb 0%, #f3f4f6 100%);
-  padding: 8px 6px;
+  padding: 12px 10px;
   text-align: left;
   font-weight: 600;
-  font-size: 9px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   color: var(--text-secondary);
   white-space: nowrap;
   border-bottom: 2px solid var(--border);
@@ -363,7 +363,7 @@ th {
 }
 
 td {
-  padding: 7px 6px;
+  padding: 11px 10px;
   border-bottom: 1px solid var(--border-light);
   white-space: nowrap;
   transition: var(--transition);
@@ -377,26 +377,26 @@ tr:hover {
 
 /* Column widths */
 .th-entity, .th-mode, .th-inco, .th-status { width: auto; }
-.th-supplier { min-width: 90px; }
-.th-po { min-width: 60px; }
-.th-value { min-width: 70px; }
-.th-route { min-width: 60px; }
-.th-size { min-width: 60px; }
-.th-transit { min-width: 50px; }
-.th-date { min-width: 70px; font-size: 9px; }
-.td-date { font-size: 10px; white-space: nowrap; color: var(--text-secondary); }
+.th-supplier { min-width: 110px; }
+.th-po { min-width: 80px; }
+.th-value { min-width: 90px; }
+.th-route { min-width: 80px; }
+.th-size { min-width: 80px; }
+.th-transit { min-width: 60px; }
+.th-date { min-width: 85px; font-size: 11px; }
+.td-date { font-size: 13px; white-space: nowrap; color: var(--text-secondary); }
 .card-dates { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
 .date-tag {
-  font-size: 11px;
-  padding: 2px 8px;
+  font-size: 12px;
+  padding: 3px 10px;
   border-radius: 6px;
   background: var(--primary-bg);
   color: var(--primary);
   font-weight: 500;
 }
-.th-quote { min-width: 60px; }
-.th-pct { min-width: 35px; }
-.th-remarks { min-width: 120px; }
+.th-quote { min-width: 70px; }
+.th-pct { min-width: 45px; }
+.th-remarks { min-width: 140px; }
 
 .num {
   text-align: right;
@@ -404,12 +404,12 @@ tr:hover {
   font-weight: 500;
 }
 
-.td-supplier { font-weight: 600; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
-.td-mono { font-family: 'SF Mono', 'Consolas', monospace; font-size: 10px; }
-.td-value { font-weight: 600; color: var(--text); }
-.td-size { font-size: 10px; color: var(--text-secondary); }
-.td-transit { font-size: 10px; color: var(--text-secondary); }
-.td-remarks { max-width: 160px; overflow: hidden; text-overflow: ellipsis; font-size: 10px; color: var(--text-secondary); }
+.td-supplier { font-weight: 600; max-width: 140px; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
+.td-mono { font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px; }
+.td-value { font-weight: 600; color: var(--text); font-size: 13px; }
+.td-size { font-size: 12px; color: var(--text-secondary); }
+.td-transit { font-size: 12px; color: var(--text-secondary); }
+.td-remarks { max-width: 180px; overflow: hidden; text-overflow: ellipsis; font-size: 12px; color: var(--text-secondary); }
 
 .awarded {
   background: var(--success-bg) !important;
@@ -437,9 +437,9 @@ tr:hover {
 .entity-badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 20px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -469,10 +469,10 @@ tr:hover {
 .mode-tag {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-size: 10px;
+  gap: 3px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 12px;
   font-weight: 500;
   background: var(--bg);
   color: var(--text-secondary);
@@ -481,9 +481,9 @@ tr:hover {
 /* Inco Tag */
 .inco-tag {
   display: inline-block;
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 12px;
   font-weight: 600;
   background: var(--info-bg);
   color: var(--info);
@@ -496,7 +496,7 @@ tr:hover {
   align-items: center;
   padding: 4px 12px;
   border-radius: 20px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -512,9 +512,9 @@ tr:hover {
 
 /* ─── Status Select ─── */
 .status-select {
-  padding: 3px 6px;
-  border-radius: 5px;
-  font-size: 10px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 600;
   border: 1px solid var(--border-light);
   cursor: pointer;
@@ -524,8 +524,8 @@ tr:hover {
 }
 
 .status-select-sm {
-  font-size: 10px;
-  padding: 3px 6px;
+  font-size: 11px;
+  padding: 4px 7px;
 }
 
 .status-sent { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
@@ -596,7 +596,7 @@ tr:hover {
 }
 
 .quotes-expand-title {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.01em;
@@ -631,7 +631,7 @@ tr:hover {
 }
 
 .quotes-expand-card-name {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 6px;
@@ -639,7 +639,7 @@ tr:hover {
 }
 
 .quotes-expand-card-amount {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.02em;
@@ -654,9 +654,9 @@ tr:hover {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: 16px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   border: 1px solid var(--border-light);
@@ -704,7 +704,7 @@ tr:hover {
 }
 
 .card-supplier {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--text);
   margin-bottom: 4px;
@@ -712,13 +712,13 @@ tr:hover {
 
 .card-po {
   font-family: 'SF Mono', 'Consolas', monospace;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   margin-bottom: 8px;
 }
 
 .card-value {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--text);
   letter-spacing: -0.02em;
@@ -818,7 +818,7 @@ tr:hover {
 }
 
 .card-pct {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--primary);
 }
