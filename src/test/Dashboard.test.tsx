@@ -28,6 +28,7 @@ const mockQuotations: Quotation[] = [
     etd: '',
     eta: '',
     status: 'Delivered',
+    savings: 5000,
   },
   {
     id: 2,
@@ -48,6 +49,7 @@ const mockQuotations: Quotation[] = [
     etd: '',
     eta: '',
     status: 'Sent for quotation',
+    savings: 0,
   },
 ];
 

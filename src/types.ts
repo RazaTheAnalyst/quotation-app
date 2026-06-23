@@ -30,6 +30,7 @@ export interface Quotation {
   etd: string;
   eta: string;
   status: string;
+  savings: number;
 }
 
 export type QuotationInput = Omit<Quotation, 'id' | 'percentage'>;

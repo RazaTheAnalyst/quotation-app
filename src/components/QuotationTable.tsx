@@ -14,6 +14,7 @@ interface QuotationTableProps {
 
 export default function QuotationTable({ quotations, forwarders, onEdit, onDelete, onAward, onStatusChange }: QuotationTableProps) {
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+  const [mobileExpandedCards, setMobileExpandedCards] = useState<Set<number>>(new Set());
 
   const fmt = (val: number) =>
     new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
@@ -34,6 +35,7 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
       Incoterms: q.incoterms,
       Status: q.status,
       'Freight %': q.percentage,
+      'Savings (AED)': q.savings,
       Remarks: q.remarks,
       'Awarded To': q.awardedTo || '-',
       ...forwarders.reduce((acc, f) => {
@@ -50,6 +52,15 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
 
   const toggleRow = (id: number) => {
     setExpandedRows(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleMobileCard = (id: number) => {
+    setMobileExpandedCards(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -105,13 +116,14 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
               <th className="th-inco">Inco</th>
               <th className="th-status">Status</th>
               <th className="th-pct num">%</th>
+              <th className="th-savings num">Savings</th>
               <th className="th-remarks">Remarks</th>
             </tr>
           </thead>
           <tbody>
             {quotations.length === 0 ? (
               <tr>
-                <td colSpan={16}>
+                <td colSpan={17}>
                   <div className="empty-state">
                     <div className="empty-state-icon">{'\uD83D\uDD0D'}</div>
                     <div className="empty-state-text">No quotations found</div>
@@ -155,6 +167,7 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
                         </select>
                       </td>
                       <td className="num">{q.percentage}%</td>
+                      <td className="num td-savings">{q.savings > 0 ? fmt(q.savings) : '-'}</td>
                       <td className="td-remarks">{q.remarks || '-'}</td>
                     </tr>
                     {isExpanded && (
@@ -162,7 +175,7 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
                         <td colSpan={16}>
                           <div className="quotes-expand-panel">
                             <div className="quotes-expand-top">
-                              <div className="quotes-expand-title">{'\uD83D\uDCB3'} Forwarder Quotes</div>
+                              <div className="quotes-expand-title">{'\uD83D\uDCB3'} Forwarder Quotes {q.savings > 0 && <span className="savings-badge">Savings: AED {fmt(q.savings)}</span>}</div>
                               <div className="quotes-expand-actions">
                                 <button className="btn btn-sm btn-edit" onClick={() => onEdit(q)}>
                                   {'\u270F\uFE0F'} Edit
@@ -245,26 +258,36 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
                 </div>
               )}
               {q.size && <div className="card-size">{'\uD83D\uDCE6'} {q.size}</div>}
-              <div className="card-quotes">
-                {forwarders.map(fwd => {
-                  const quote = q.quotes.find(qu => qu.forwarder === fwd.name);
-                  return (
-                    <div key={fwd.id} className={`card-quote ${getAwardClass(fwd.name, q.awardedTo)}`}>
-                      <span className="card-quote-name">{fwd.name}</span>
-                      <span className="card-quote-value">{quote ? fmt(quote.quotedAmount) : '-'}</span>
-                      {quote && quote.quotedAmount > 0 && (
-                        <button
-                          className="btn-award"
-                          title={`Award to ${fwd.name}`}
-                          onClick={() => onAward(q.id, fwd.name)}
-                        >
-                          {q.awardedTo === fwd.name ? '\u2605' : '\u2606'}
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              {q.savings > 0 && <div className="card-savings">{'\uD83D\uDCB0'} Savings: AED {fmt(q.savings)}</div>}
+              <button
+                className={`card-quotes-toggle ${mobileExpandedCards.has(q.id) ? 'expanded' : ''}`}
+                onClick={() => toggleMobileCard(q.id)}
+              >
+                {'\uD83D\uDCB3'} Forwarder Quotes ({q.quotes.filter(qt => qt.quotedAmount > 0).length})
+                <span className={`expand-icon ${mobileExpandedCards.has(q.id) ? 'expanded' : ''}`}>{'\u25B6'}</span>
+              </button>
+              {mobileExpandedCards.has(q.id) && (
+                <div className="card-quotes">
+                  {forwarders.map(fwd => {
+                    const quote = q.quotes.find(qu => qu.forwarder === fwd.name);
+                    return (
+                      <div key={fwd.id} className={`card-quote ${getAwardClass(fwd.name, q.awardedTo)}`}>
+                        <span className="card-quote-name">{fwd.name}</span>
+                        <span className="card-quote-value">{quote ? fmt(quote.quotedAmount) : '-'}</span>
+                        {quote && quote.quotedAmount > 0 && (
+                          <button
+                            className="btn-award"
+                            title={`Award to ${fwd.name}`}
+                            onClick={() => onAward(q.id, fwd.name)}
+                          >
+                            {q.awardedTo === fwd.name ? '\u2605' : '\u2606'}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
               {q.remarks && <div className="card-remarks">{'\uD83D\uDCCB'} {q.remarks}</div>}
               <div className="card-footer">
                 <span className="card-pct">{q.percentage}%</span>

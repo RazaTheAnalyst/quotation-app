@@ -26,6 +26,7 @@ const quotationSchema = z.object({
   etd: z.string().optional().default(''),
   eta: z.string().optional().default(''),
   status: z.string().optional().default('Pending'),
+  savings: z.coerce.number().min(0).optional().default(0),
 });
 
 type QuotationFormData = z.infer<typeof quotationSchema>;
@@ -57,6 +58,7 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
       etd: quotation?.etd ?? '',
       eta: quotation?.eta ?? '',
       status: quotation?.status ?? 'Pending',
+      savings: quotation?.savings ?? 0,
     },
   });
 
@@ -353,6 +355,10 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
                   </div>
                   <span className="percentage-value">{percentage}%</span>
                 </div>
+              </div>
+              <div className="form-group">
+                <label htmlFor="savings">{'\uD83D\uDCB0'} Savings (AED)</label>
+                <input id="savings" type="number" step="0.01" placeholder="0.00" {...register('savings')} />
               </div>
               <div className="form-group">
                 <label htmlFor="remarks">{'\uD83D\uDCDD'} Remarks</label>

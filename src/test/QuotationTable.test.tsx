@@ -29,6 +29,7 @@ const mockQuotations: Quotation[] = [
     etd: '',
     eta: '',
     status: 'Delivered',
+    savings: 5000,
   },
 ];
 
@@ -51,6 +52,7 @@ const pendingQuotation: Quotation = {
   etd: '',
   eta: '',
   status: 'Sent for quotation',
+  savings: 0,
 };
 
 describe('QuotationTable', () => {
@@ -151,7 +153,8 @@ describe('QuotationTable', () => {
     expect(mockOnDelete).toHaveBeenCalledWith(1);
   });
 
-  it('shows awarded badge for awarded quotations', () => {
+  it('shows awarded badge for awarded quotations', async () => {
+    const user = userEvent.setup();
     render(
       <QuotationTable
         quotations={mockQuotations}
@@ -162,6 +165,8 @@ describe('QuotationTable', () => {
         onStatusChange={mockOnStatusChange}
       />
     );
+    const toggleBtn = screen.getByText(/Forwarder Quotes/);
+    await user.click(toggleBtn);
     expect(screen.getAllByText('BDP').length).toBeGreaterThanOrEqual(1);
   });
 

@@ -23,6 +23,7 @@ export const initialData: Quotation[] = [
     etd: '',
     eta: '2026-07-07',
     status: 'Delivered',
+    savings: 0,
   },
   {
     id: 2,
@@ -46,6 +47,7 @@ export const initialData: Quotation[] = [
     etd: '2026-06-27',
     eta: '2026-08-07',
     status: 'In Transit',
+    savings: 11270.85,
   },
   {
     id: 3,
@@ -69,6 +71,7 @@ export const initialData: Quotation[] = [
     etd: '',
     eta: '',
     status: 'Assign to forwarder',
+    savings: 10556.70,
   },
   {
     id: 4,
@@ -92,6 +95,7 @@ export const initialData: Quotation[] = [
     etd: '',
     eta: '',
     status: 'Sent for quotation',
+    savings: 0,
   },
   {
     id: 5,
@@ -115,6 +119,7 @@ export const initialData: Quotation[] = [
     etd: '',
     eta: '',
     status: 'Under Clearence',
+    savings: 40.00,
   },
   {
     id: 6,
@@ -138,6 +143,7 @@ export const initialData: Quotation[] = [
     etd: '',
     eta: '',
     status: 'Sent for quotation',
+    savings: 0,
   },
   {
     id: 7,
@@ -161,5 +167,6 @@ export const initialData: Quotation[] = [
     etd: '',
     eta: '',
     status: 'Arrived Awaiting clearence',
+    savings: 150.00,
   },
 ];

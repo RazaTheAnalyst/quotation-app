@@ -21,6 +21,7 @@ interface QuotationRow {
   etd: string;
   eta: string;
   status: string;
+  savings: number;
 }
 
 interface ForwarderRow {
@@ -52,6 +53,7 @@ function rowToQuotation(row: QuotationRow): Quotation {
     etd: row.etd ?? '',
     eta: row.eta ?? '',
     status: row.status ?? 'Pending',
+    savings: row.savings ?? 0,
   };
 }
 
@@ -84,6 +86,7 @@ function quotationInputToRow(data: QuotationInput, percentage = 0) {
     etd: data.etd ?? '',
     eta: data.eta ?? '',
     status: data.status ?? 'Pending',
+    savings: data.savings ?? 0,
   };
 }
 
@@ -144,6 +147,7 @@ export async function updateQuotationAPI(id: number, input: Partial<QuotationInp
   if (input.etd !== undefined) row.etd = input.etd;
   if (input.eta !== undefined) row.eta = input.eta;
   if (input.status !== undefined) row.status = input.status;
+  if (input.savings !== undefined) row.savings = input.savings;
 
   const { data, error } = await supabase
     .from('quotations')

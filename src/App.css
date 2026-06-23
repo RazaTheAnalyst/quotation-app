@@ -630,7 +630,22 @@ tr:hover {
 }
 
 .quotes-expand-card.not-awarded {
-  opacity: 0.5;
+  opacity: 0.85;
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.quotes-expand-card.not-awarded .quotes-expand-card-name {
+  color: #d1d5db;
+}
+
+.quotes-expand-card.not-awarded .quotes-expand-card-amount {
+  color: #e5e7eb;
+}
+
+.quotes-expand-card.not-arded .btn-award-expand {
+  color: #9ca3af;
+  border-color: #4b5563;
 }
 
 .quotes-expand-card-name {
@@ -680,6 +695,30 @@ tr:hover {
   background: var(--success);
   color: white;
   border-color: var(--success);
+}
+
+.savings-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  margin-left: 8px;
+}
+
+.td-savings {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.card-savings {
+  padding: 6px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--success);
 }
 
 /* ═══════════════════════════════════════════════
@@ -769,6 +808,38 @@ tr:hover {
   margin-bottom: 10px;
 }
 
+.card-quotes-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.card-quotes-toggle:hover {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+}
+
+.card-quotes-toggle .expand-icon {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.card-quotes-toggle .expand-icon.expanded {
+  transform: rotate(90deg);
+}
+
 .card-quotes {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -787,6 +858,19 @@ tr:hover {
 .card-quote.awarded {
   border-color: var(--success);
   background: var(--success-bg);
+}
+
+.card-quote.not-awarded {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.card-quote.not-awarded .card-quote-name {
+  color: #d1d5db;
+}
+
+.card-quote.not-awarded .card-quote-value {
+  color: #e5e7eb;
 }
 
 .card-quote-name {
