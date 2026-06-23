@@ -19,6 +19,8 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
     return sum + (awardedQuote?.quotedAmount ?? 0);
   }, 0);
 
+  const totalSavings = quotations.reduce((sum, q) => sum + (q.savings ?? 0), 0);
+
   const freightVsPO = totalPOValue > 0
     ? ((totalFreightSpending / totalPOValue) * 100).toFixed(1)
     : '0.0';
@@ -43,7 +45,9 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
       const awardedQuote = q.quotes.find(qu => qu.forwarder === q.awardedTo);
       return sum + (awardedQuote?.quotedAmount ?? 0);
     }, 0);
-    return { entity: e, count: items.length, totalValue: items.reduce((s, q) => s + q.poValue, 0), freight: entityFreight };
+    const entityPOValue = items.reduce((s, q) => s + q.poValue, 0);
+    const entityFreightPct = entityPOValue > 0 ? ((entityFreight / entityPOValue) * 100).toFixed(1) : '0.0';
+    return { entity: e, count: items.length, totalValue: entityPOValue, freight: entityFreight, freightPct: entityFreightPct };
   });
 
   const formatCurrency = (val: number) =>
@@ -93,6 +97,12 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
           <div className="stat-value">{pendingCount}</div>
           <div className="stat-sub">{totalQuotations > 0 ? (100 - Number(awardRate)) : 0}% pending</div>
         </div>
+        <div className="stat-card green">
+          <div className="stat-icon">&#x1F4B0;</div>
+          <div className="stat-label">Total Savings</div>
+          <div className="stat-value">{formatCurrency(totalSavings)}</div>
+          <div className="stat-sub">AED saved</div>
+        </div>
       </div>
 
       <div className="dashboard-sections">
@@ -129,7 +139,7 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
                 </div>
                 <div className="entity-card-value">AED {formatCurrency(e.totalValue)}</div>
                 <div className="entity-card-freight">Freight: AED {formatCurrency(e.freight)}</div>
-                <div className="entity-card-label">PO Value</div>
+                <div className="entity-card-pct">{e.freightPct}% of PO Value</div>
               </div>
             ))}
           </div>
