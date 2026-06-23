@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { Quotation, QuotationInput, Forwarder, ClientPO, ClientPOInput } from './types';
+import type { Quotation, QuotationInput, Forwarder } from './types';
 import {
   fetchQuotations,
   createQuotation,
@@ -8,29 +8,22 @@ import {
   fetchForwarders,
   createForwarderAPI,
   deleteForwarderAPI,
-  fetchClientPOs,
-  createClientPO,
-  updateClientPOAPI,
-  deleteClientPOAPI,
 } from './api';
 
 export function useStore() {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [forwarders, setForwarders] = useState<Forwarder[]>([]);
-  const [clientPOs, setClientPOs] = useState<ClientPO[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       try {
-        const [qData, fData, cData] = await Promise.all([
+        const [qData, fData] = await Promise.all([
           fetchQuotations(),
           fetchForwarders(),
-          fetchClientPOs(),
         ]);
         setQuotations(qData);
         setForwarders(fData);
-        setClientPOs(cData);
       } catch (err) {
         console.error('Failed to load from Supabase:', err);
       }
@@ -64,33 +57,14 @@ export function useStore() {
     setForwarders(prev => prev.filter(f => f.id !== id));
   }, []);
 
-  const addClientPO = useCallback(async (input: ClientPOInput) => {
-    const saved = await createClientPO(input);
-    setClientPOs(prev => [...prev, saved]);
-  }, []);
-
-  const updateClientPO = useCallback(async (id: number, updated: Partial<ClientPOInput>) => {
-    const saved = await updateClientPOAPI(id, updated);
-    setClientPOs(prev => prev.map(c => c.id === id ? saved : c));
-  }, []);
-
-  const deleteClientPO = useCallback(async (id: number) => {
-    await deleteClientPOAPI(id);
-    setClientPOs(prev => prev.filter(c => c.id !== id));
-  }, []);
-
   return {
     quotations,
     forwarders,
-    clientPOs,
     addQuotation,
     updateQuotation,
     deleteQuotation,
     addForwarder,
     deleteForwarder,
-    addClientPO,
-    updateClientPO,
-    deleteClientPO,
     loading,
   };
 }

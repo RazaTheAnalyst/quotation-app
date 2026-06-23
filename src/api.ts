@@ -1,4 +1,4 @@
-import type { Quotation, QuotationInput, Forwarder, ClientPO, ClientPOInput } from './types';
+import type { Quotation, QuotationInput, Forwarder } from './types';
 import { supabase } from './supabase';
 
 // ─── Row types (snake_case from Supabase) ───
@@ -190,102 +190,6 @@ export async function createForwarderAPI(data: Omit<Forwarder, 'id'>): Promise<F
 export async function deleteForwarderAPI(id: number): Promise<void> {
   const { error } = await supabase
     .from('forwarders')
-    .delete()
-    .eq('id', id);
-  if (error) throw error;
-}
-
-// ─── Client POs API ───
-interface ClientPORow {
-  id: number;
-  customer_name: string;
-  customer_po: string;
-  customer_po_amount: number;
-  customer_po_currency: string;
-  po_amount_aed: number;
-  supplier_po: string;
-  supplier_name: string;
-  order_no: string;
-  status: string;
-  remarks: string;
-}
-
-function rowToClientPO(row: ClientPORow): ClientPO {
-  return {
-    id: row.id,
-    customerName: row.customer_name,
-    customerPO: row.customer_po,
-    customerPOAmount: row.customer_po_amount,
-    customerPOCurrency: row.customer_po_currency ?? 'AED',
-    poAmountAED: row.po_amount_aed,
-    supplierPO: row.supplier_po,
-    supplierName: row.supplier_name,
-    orderNo: row.order_no,
-    status: row.status,
-    remarks: row.remarks,
-  };
-}
-
-function clientPOInputToRow(data: ClientPOInput) {
-  return {
-    customer_name: data.customerName,
-    customer_po: data.customerPO,
-    customer_po_amount: data.customerPOAmount,
-    customer_po_currency: data.customerPOCurrency || 'AED',
-    po_amount_aed: data.poAmountAED,
-    supplier_po: data.supplierPO,
-    supplier_name: data.supplierName,
-    order_no: data.orderNo,
-    status: data.status || 'PO Received',
-    remarks: data.remarks,
-  };
-}
-
-export async function fetchClientPOs(): Promise<ClientPO[]> {
-  const { data, error } = await supabase
-    .from('client_pos')
-    .select('*')
-    .order('id', { ascending: true });
-  if (error) throw error;
-  return (data as ClientPORow[]).map(rowToClientPO);
-}
-
-export async function createClientPO(input: ClientPOInput): Promise<ClientPO> {
-  const { data, error } = await supabase
-    .from('client_pos')
-    .insert(clientPOInputToRow(input))
-    .select()
-    .single();
-  if (error) throw error;
-  return rowToClientPO(data as ClientPORow);
-}
-
-export async function updateClientPOAPI(id: number, input: Partial<ClientPOInput>): Promise<ClientPO> {
-  const row: Record<string, unknown> = {};
-  if (input.customerName !== undefined) row.customer_name = input.customerName;
-  if (input.customerPO !== undefined) row.customer_po = input.customerPO;
-  if (input.customerPOAmount !== undefined) row.customer_po_amount = input.customerPOAmount;
-  if (input.customerPOCurrency !== undefined) row.customer_po_currency = input.customerPOCurrency;
-  if (input.poAmountAED !== undefined) row.po_amount_aed = input.poAmountAED;
-  if (input.supplierPO !== undefined) row.supplier_po = input.supplierPO;
-  if (input.supplierName !== undefined) row.supplier_name = input.supplierName;
-  if (input.orderNo !== undefined) row.order_no = input.orderNo;
-  if (input.status !== undefined) row.status = input.status;
-  if (input.remarks !== undefined) row.remarks = input.remarks;
-
-  const { data, error } = await supabase
-    .from('client_pos')
-    .update(row)
-    .eq('id', id)
-    .select()
-    .single();
-  if (error) throw error;
-  return rowToClientPO(data as ClientPORow);
-}
-
-export async function deleteClientPOAPI(id: number): Promise<void> {
-  const { error } = await supabase
-    .from('client_pos')
     .delete()
     .eq('id', id);
   if (error) throw error;
