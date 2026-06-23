@@ -9,9 +9,6 @@ interface DashboardProps {
 export default function Dashboard({ quotations, forwarders }: DashboardProps) {
   const totalPOValue = quotations.reduce((sum, q) => sum + q.poValue, 0);
   const totalQuotations = quotations.length;
-  const awardedCount = quotations.filter(q => q.awardedTo).length;
-  const pendingCount = totalQuotations - awardedCount;
-  const awardRate = totalQuotations > 0 ? ((awardedCount / totalQuotations) * 100).toFixed(0) : '0';
 
   const totalFreightSpending = quotations.reduce((sum, q) => {
     if (!q.awardedTo) return sum;
@@ -84,18 +81,6 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
           <div className="stat-label">Freight vs PO</div>
           <div className="stat-value">{freightVsPO}%</div>
           <div className="stat-sub">of PO value</div>
-        </div>
-        <div className="stat-card green">
-          <div className="stat-icon">&#x2705;</div>
-          <div className="stat-label">Awarded</div>
-          <div className="stat-value">{awardedCount}</div>
-          <div className="stat-sub">{awardRate}% award rate</div>
-        </div>
-        <div className="stat-card red">
-          <div className="stat-icon">&#x23F3;</div>
-          <div className="stat-label">Pending</div>
-          <div className="stat-value">{pendingCount}</div>
-          <div className="stat-sub">{totalQuotations > 0 ? (100 - Number(awardRate)) : 0}% pending</div>
         </div>
         <div className="stat-card green">
           <div className="stat-icon">&#x1F4B0;</div>
