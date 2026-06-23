@@ -36,7 +36,6 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
       Status: q.status,
       'Freight %': q.percentage,
       'Savings (AED)': q.savings,
-      Remarks: q.remarks,
       'Awarded To': q.awardedTo || '-',
       ...forwarders.reduce((acc, f) => {
         const quote = q.quotes.find(qu => qu.forwarder === f.name);
@@ -117,13 +116,12 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
               <th className="th-status">Status</th>
               <th className="th-pct num">%</th>
               <th className="th-savings num">Savings</th>
-              <th className="th-remarks">Remarks</th>
             </tr>
           </thead>
           <tbody>
             {quotations.length === 0 ? (
               <tr>
-                <td colSpan={17}>
+                <td colSpan={16}>
                   <div className="empty-state">
                     <div className="empty-state-icon">{'\uD83D\uDD0D'}</div>
                     <div className="empty-state-text">No quotations found</div>
@@ -168,7 +166,6 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
                       </td>
                       <td className="num">{q.percentage}%</td>
                       <td className="num td-savings">{q.savings > 0 ? fmt(q.savings) : '-'}</td>
-                      <td className="td-remarks">{q.remarks || '-'}</td>
                     </tr>
                     {isExpanded && (
                       <tr key={`${q.id}-quotes`} className="quotes-expand-row">
@@ -204,6 +201,7 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
                                 );
                               })}
                             </div>
+                            {q.remarks && <div className="quotes-expand-remarks">{'\uD83D\uDCCB'} {q.remarks}</div>}
                           </div>
                         </td>
                       </tr>
@@ -288,7 +286,6 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
                   })}
                 </div>
               )}
-              {q.remarks && <div className="card-remarks">{'\uD83D\uDCCB'} {q.remarks}</div>}
               <div className="card-footer">
                 <span className="card-pct">{q.percentage}%</span>
                 <div className="card-actions">

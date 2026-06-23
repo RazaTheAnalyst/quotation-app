@@ -37,8 +37,7 @@ export function useStore() {
   }, []);
 
   const updateQuotation = useCallback(async (id: number, updated: Partial<QuotationInput>) => {
-    const percentage = calculatePercentage(updated as Partial<QuotationInput>);
-    const saved = await updateQuotationAPI(id, { ...updated, percentage });
+    const saved = await updateQuotationAPI(id, updated);
     setQuotations(prev => prev.map(q => q.id === id ? saved : q));
   }, []);
 
@@ -67,12 +66,4 @@ export function useStore() {
     deleteForwarder,
     loading,
   };
-}
-
-function calculatePercentage(data: Partial<QuotationInput>): number {
-  const poValue = data.poValue ?? 0;
-  if (poValue <= 0) return 0;
-  const awardedQuote = data.quotes?.find(q => q.forwarder === data.awardedTo);
-  const awardedAmount = awardedQuote?.quotedAmount ?? 0;
-  return Math.round((awardedAmount / poValue) * 10000) / 100;
 }

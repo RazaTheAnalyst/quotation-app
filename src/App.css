@@ -697,6 +697,16 @@ tr:hover {
   border-color: var(--success);
 }
 
+.quotes-expand-remarks {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--bg);
+  font-size: 12px;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+}
+
 .savings-badge {
   display: inline-flex;
   align-items: center;
@@ -712,6 +722,14 @@ tr:hover {
 .td-savings {
   color: var(--success);
   font-weight: 600;
+}
+
+.savings-auto {
+  background: var(--success-bg) !important;
+  color: var(--success) !important;
+  font-weight: 600 !important;
+  cursor: default !important;
+  border-color: var(--success) !important;
 }
 
 .card-savings {

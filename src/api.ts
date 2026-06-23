@@ -102,9 +102,19 @@ function forwarderInputToRow(data: Omit<Forwarder, 'id'>) {
 function computePercentage(data: QuotationInput): number {
   const poValue = data.poValue ?? 0;
   if (poValue <= 0) return 0;
-  const awardedQuote = data.quotes?.find(q => q.forwarder === data.awardedTo);
-  const awardedAmount = awardedQuote?.quotedAmount ?? 0;
-  return Math.round((awardedAmount / poValue) * 10000) / 100;
+  const validQuotes = (data.quotes ?? []).filter(q => q.quotedAmount > 0);
+  if (validQuotes.length === 0) return 0;
+  const lowestAmount = Math.min(...validQuotes.map(q => q.quotedAmount));
+  return Math.round((lowestAmount / poValue) * 10000) / 100;
+}
+
+function computeSavings(data: QuotationInput): number {
+  const validQuotes = (data.quotes ?? []).filter(q => q.quotedAmount > 0);
+  if (validQuotes.length < 2) return data.savings ?? 0;
+  const amounts = validQuotes.map(q => q.quotedAmount);
+  const highest = Math.max(...amounts);
+  const lowest = Math.min(...amounts);
+  return Math.round((highest - lowest) * 100) / 100;
 }
 
 // ─── Quotations API ───
@@ -119,9 +129,10 @@ export async function fetchQuotations(): Promise<Quotation[]> {
 
 export async function createQuotation(input: QuotationInput): Promise<Quotation> {
   const percentage = computePercentage(input);
+  const savings = computeSavings(input);
   const { data, error } = await supabase
     .from('quotations')
-    .insert(quotationInputToRow(input, percentage))
+    .insert({ ...quotationInputToRow(input, percentage), savings })
     .select()
     .single();
   if (error) throw error;
@@ -148,6 +159,13 @@ export async function updateQuotationAPI(id: number, input: Partial<QuotationInp
   if (input.eta !== undefined) row.eta = input.eta;
   if (input.status !== undefined) row.status = input.status;
   if (input.savings !== undefined) row.savings = input.savings;
+
+  if (input.quotes !== undefined || input.poValue !== undefined) {
+    const percentage = computePercentage(input as QuotationInput);
+    const savings = computeSavings(input as QuotationInput);
+    row.percentage = percentage;
+    row.savings = savings;
+  }
 
   const { data, error } = await supabase
     .from('quotations')

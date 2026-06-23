@@ -79,7 +79,6 @@ describe('QuotationTable', () => {
     expect(screen.getByText('Entity')).toBeInTheDocument();
     expect(screen.getByText('Supplier')).toBeInTheDocument();
     expect(screen.getByText('PO Value')).toBeInTheDocument();
-    expect(screen.getByText('Remarks')).toBeInTheDocument();
   });
 
   it('renders quotation data in desktop table', () => {

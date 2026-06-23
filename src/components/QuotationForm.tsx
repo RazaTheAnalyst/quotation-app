@@ -75,9 +75,13 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
   const [showOriginDropdown, setShowOriginDropdown] = useState(false);
   const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
 
-  const awardedQuote = quotes.find(q => q.forwarder === awardedTo);
-  const awardedAmount = awardedQuote?.quotedAmount ?? 0;
-  const percentage = poValue > 0 ? ((awardedAmount / poValue) * 100).toFixed(2) : '0.00';
+  const validQuotes = quotes.filter(q => q.quotedAmount > 0);
+  const lowestAmount = validQuotes.length > 0 ? Math.min(...validQuotes.map(q => q.quotedAmount)) : 0;
+  const percentage = poValue > 0 ? ((lowestAmount / poValue) * 100).toFixed(2) : '0.00';
+
+  const autoSavings = validQuotes.length >= 2
+    ? Math.round((Math.max(...validQuotes.map(q => q.quotedAmount)) - lowestAmount) * 100) / 100
+    : null;
 
   const filteredOrigins = useMemo(() => {
     if (!originSearch) return COUNTRIES;
@@ -120,10 +124,14 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
   };
 
   const handleFormSubmit = (data: QuotationFormData) => {
-    const percentageVal = data.poValue > 0 && data.awardedTo
-      ? ((data.quotes.find(q => q.forwarder === data.awardedTo)?.quotedAmount ?? 0) / data.poValue) * 100
-      : 0;
-    onSave({ ...data, percentage: Math.round(percentageVal * 100) / 100 } as QuotationFormData & { percentage: number });
+    const validQ = data.quotes.filter(q => q.quotedAmount > 0);
+    const lowestAmt = validQ.length > 0 ? Math.min(...validQ.map(q => q.quotedAmount)) : 0;
+    const percentageVal = data.poValue > 0 ? (lowestAmt / data.poValue) * 100 : 0;
+    let savingsVal = data.savings ?? 0;
+    if (validQ.length >= 2) {
+      savingsVal = Math.round((Math.max(...validQ.map(q => q.quotedAmount)) - lowestAmt) * 100) / 100;
+    }
+    onSave({ ...data, percentage: Math.round(percentageVal * 100) / 100, savings: savingsVal } as QuotationFormData & { percentage: number; savings: number });
   };
 
   const handleAddForwarder = () => {
@@ -348,7 +356,7 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
                 </select>
               </div>
               <div className="form-group">
-                <label>{'\uD83D\uDCCA'} Calculated %</label>
+                <label>{'\uD83D\uDCCA'} Lowest Quote %</label>
                 <div className="percentage-display">
                   <div className="percentage-bar">
                     <div className="percentage-fill" style={{ width: `${Math.min(Number(percentage), 100)}%` }} />
@@ -358,7 +366,11 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
               </div>
               <div className="form-group">
                 <label htmlFor="savings">{'\uD83D\uDCB0'} Savings (AED)</label>
-                <input id="savings" type="number" step="0.01" placeholder="0.00" {...register('savings')} />
+                {autoSavings !== null ? (
+                  <input id="savings" type="text" readOnly value={`AED ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(autoSavings)} (auto)`} className="savings-auto" />
+                ) : (
+                  <input id="savings" type="number" step="0.01" placeholder="Enter manually (1 quote only)" {...register('savings')} />
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="remarks">{'\uD83D\uDCDD'} Remarks</label>

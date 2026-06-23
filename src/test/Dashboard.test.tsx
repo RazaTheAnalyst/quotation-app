@@ -60,11 +60,9 @@ describe('Dashboard', () => {
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
-  it('renders awarded and pending counts', () => {
+  it('renders savings card', () => {
     render(<Dashboard quotations={mockQuotations} forwarders={mockForwarders} />);
-    expect(screen.getByText('Awarded')).toBeInTheDocument();
-    expect(screen.getAllByText('1').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('Pending')).toBeInTheDocument();
+    expect(screen.getByText('Total Savings')).toBeInTheDocument();
   });
 
   it('renders forwarder stats', () => {
