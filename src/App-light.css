@@ -5,38 +5,38 @@
 }
 
 :root {
-  --primary: #818cf8;
-  --primary-hover: #6366f1;
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
   --primary-light: #a5b4fc;
-  --primary-bg: rgba(129, 140, 248, 0.12);
-  --success: #34d399;
-  --success-hover: #10b981;
-  --success-light: rgba(16, 185, 129, 0.15);
-  --success-bg: rgba(52, 211, 153, 0.12);
-  --warning: #fbbf24;
-  --warning-light: rgba(251, 191, 36, 0.15);
-  --warning-bg: rgba(251, 191, 36, 0.12);
-  --danger: #f87171;
-  --danger-hover: #ef4444;
-  --danger-light: rgba(248, 113, 113, 0.15);
-  --danger-bg: rgba(248, 113, 113, 0.12);
-  --info: #60a5fa;
-  --info-bg: rgba(96, 165, 250, 0.12);
-  --purple: #a78bfa;
-  --purple-bg: rgba(167, 139, 250, 0.12);
-  --cyan: #22d3ee;
-  --cyan-bg: rgba(34, 211, 238, 0.12);
-  --pink: #f472b6;
-  --pink-bg: rgba(244, 114, 182, 0.12);
-  --bg: #0b1120;
-  --card-bg: #111827;
-  --card-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
-  --card-shadow-hover: 0 10px 40px rgba(0,0,0,0.4);
-  --border: #1e293b;
-  --border-light: #1a2332;
-  --text: #e2e8f0;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --primary-bg: rgba(99, 102, 241, 0.08);
+  --success: #10b981;
+  --success-hover: #059669;
+  --success-light: #d1fae5;
+  --success-bg: rgba(16, 185, 129, 0.1);
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --warning-bg: rgba(245, 158, 11, 0.1);
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --danger-light: #fee2e2;
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --info: #3b82f6;
+  --info-bg: rgba(59, 130, 246, 0.1);
+  --purple: #8b5cf6;
+  --purple-bg: rgba(139, 92, 246, 0.1);
+  --cyan: #06b6d4;
+  --cyan-bg: rgba(6, 182, 212, 0.1);
+  --pink: #ec4899;
+  --pink-bg: rgba(236, 72, 153, 0.1);
+  --bg: #f0f2f5;
+  --card-bg: #ffffff;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --card-shadow-hover: 0 10px 40px rgba(0,0,0,0.08);
+  --border: #e5e7eb;
+  --border-light: #f3f4f6;
+  --text: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
   --radius-sm: 8px;
   --radius: 12px;
   --radius-lg: 16px;
@@ -348,7 +348,7 @@ table {
 }
 
 th {
-  background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+  background: linear-gradient(180deg, #f9fafb 0%, #f3f4f6 100%);
   padding: 12px 10px;
   text-align: left;
   font-weight: 600;
@@ -372,7 +372,7 @@ td {
 tr { transition: var(--transition); }
 
 tr:hover {
-  background: linear-gradient(90deg, rgba(129, 140, 248, 0.06) 0%, rgba(34, 211, 238, 0.06) 100%);
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.03) 0%, rgba(6, 182, 212, 0.03) 100%);
 }
 
 /* Column widths */
@@ -446,23 +446,23 @@ tr:hover {
 }
 
 .entity-uae {
-  background: linear-gradient(135deg, rgba(129, 140, 248, 0.15), rgba(34, 211, 238, 0.15));
-  color: #818cf8;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(6, 182, 212, 0.1));
+  color: var(--primary);
 }
 
 .entity-qatar {
-  background: linear-gradient(135deg, rgba(167, 139, 250, 0.15), rgba(244, 114, 182, 0.15));
-  color: #a78bfa;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+  color: var(--purple);
 }
 
 .entity-oman {
-  background: linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(52, 211, 153, 0.10));
-  color: #34d399;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.1));
+  color: #059669;
 }
 
 .entity-ksa {
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(251, 191, 36, 0.10));
-  color: #fbbf24;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1));
+  color: #d97706;
 }
 
 /* Mode Tag */
@@ -528,12 +528,12 @@ tr:hover {
   padding: 4px 7px;
 }
 
-.status-sent { background: rgba(96, 165, 250, 0.12); color: #60a5fa; border-color: rgba(96, 165, 250, 0.25); }
-.status-assigned { background: rgba(251, 191, 36, 0.12); color: #fbbf24; border-color: rgba(251, 191, 36, 0.25); }
-.status-transit { background: rgba(52, 211, 153, 0.12); color: #34d399; border-color: rgba(52, 211, 153, 0.25); }
-.status-arrived { background: rgba(167, 139, 250, 0.12); color: #a78bfa; border-color: rgba(167, 139, 250, 0.25); }
-.status-clearance { background: rgba(251, 146, 60, 0.12); color: #fb923c; border-color: rgba(251, 146, 60, 0.25); }
-.status-delivered { background: rgba(52, 211, 153, 0.12); color: #34d399; border-color: rgba(52, 211, 153, 0.25); }
+.status-sent { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.status-assigned { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+.status-transit { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+.status-arrived { background: #fdf4ff; color: #86198f; border-color: #f0abfc; }
+.status-clearance { background: #fff7ed; color: #9a3412; border-color: #fed7aa; }
+.status-delivered { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
 
 /* ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ Row Animation ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ */
 .animate-row {
@@ -576,9 +576,9 @@ tr:hover {
 }
 
 .quotes-expand-panel {
-  background: linear-gradient(135deg, rgba(129, 140, 248, 0.04), rgba(34, 211, 238, 0.04));
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.03), rgba(6, 182, 212, 0.03));
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
   padding: 12px 16px;
   animation: expandSlideIn 0.25s ease;
 }
@@ -980,8 +980,8 @@ tr:hover {
   justify-content: space-between;
   align-items: center;
   padding: 20px 28px;
-  border-bottom: 1px solid var(--border);
-  background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+  border-bottom: 1px solid var(--border-light);
+  background: linear-gradient(180deg, #f9fafb 0%, #ffffff 100%);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   position: sticky;
   top: 0;
@@ -1524,19 +1524,19 @@ form {
 .entity-card:hover { border-color: var(--primary-light); }
 
 .entity-card.entity-uae {
-  background: linear-gradient(135deg, rgba(129, 140, 248, 0.08), rgba(34, 211, 238, 0.08));
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(6, 182, 212, 0.05));
 }
 
 .entity-card.entity-qatar {
-  background: linear-gradient(135deg, rgba(167, 139, 250, 0.08), rgba(244, 114, 182, 0.08));
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(236, 72, 153, 0.05));
 }
 
 .entity-card.entity-oman {
-  background: linear-gradient(135deg, rgba(52, 211, 153, 0.08), rgba(52, 211, 153, 0.05));
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(52, 211, 153, 0.05));
 }
 
 .entity-card.entity-ksa {
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(251, 191, 36, 0.05));
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(251, 191, 36, 0.05));
 }
 
 .entity-card-header {
@@ -1919,8 +1919,8 @@ form {
 
 .forwarders-form-header {
   padding: 16px 24px;
-  background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
-  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #f9fafb 0%, #ffffff 100%);
+  border-bottom: 1px solid var(--border-light);
   font-size: 15px;
   font-weight: 600;
   color: var(--text);
@@ -2220,7 +2220,6 @@ form {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #0b1120;
 }
 
 .login-bg-orb {
@@ -2266,15 +2265,15 @@ form {
 .login-card {
   position: relative;
   z-index: 1;
-  background: rgba(17, 24, 39, 0.95);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: var(--radius-xl);
   padding: 48px 40px;
   width: 420px;
   max-width: 92vw;
   box-shadow:
-    0 25px 60px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
+    0 25px 60px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
   animation: loginCardIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
