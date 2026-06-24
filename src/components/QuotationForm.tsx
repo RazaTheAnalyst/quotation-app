@@ -22,7 +22,7 @@ const quotationSchema = z.object({
     quotedAmount: z.coerce.number().min(0, 'Amount must be 0 or more'),
   })),
   awardedTo: z.string().optional().default(''),
-  remarks: z.string().optional().default(''),
+  remarks: z.string().max(500, 'Remarks must be 500 characters or less').optional().default(''),
   etd: z.string().optional().default(''),
   eta: z.string().optional().default(''),
   status: z.string().optional().default('Pending'),
@@ -77,10 +77,11 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
 
   const validQuotes = quotes.filter(q => q.quotedAmount > 0);
   const lowestAmount = validQuotes.length > 0 ? Math.min(...validQuotes.map(q => q.quotedAmount)) : 0;
+  const highestAmount = validQuotes.length > 0 ? Math.max(...validQuotes.map(q => q.quotedAmount)) : 0;
   const percentage = poValue > 0 ? ((lowestAmount / poValue) * 100).toFixed(2) : '0.00';
 
   const autoSavings = validQuotes.length >= 2
-    ? Math.round((Math.max(...validQuotes.map(q => q.quotedAmount)) - lowestAmount) * 100) / 100
+    ? Math.round((highestAmount - lowestAmount) * 100) / 100
     : null;
 
   const filteredOrigins = useMemo(() => {
@@ -148,52 +149,55 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
   }, [onClose]);
 
   const renderLocationDropdown = (
-    _type: 'origin' | 'destination',
+    type: 'origin' | 'destination',
     search: string,
     setSearch: (v: string) => void,
     show: boolean,
     setShow: (v: boolean) => void,
     filtered: typeof COUNTRIES,
-    _selectedCountry: typeof COUNTRIES[number] | null,
+    selectedCountry: typeof COUNTRIES[number] | null,
     onSelect: (city: string, country: string) => void,
-  ) => (
-    <div className="location-dropdown-wrapper">
-      <input
-        type="text"
-        placeholder="Search country or city..."
-        value={search}
-        onChange={e => { setSearch(e.target.value); setShow(true); }}
-        onFocus={() => setShow(true)}
-        onBlur={() => setTimeout(() => setShow(false), 200)}
-      />
-      {show && (
-        <div className="location-dropdown">
-          {filtered.length === 0 ? (
-            <div className="location-dropdown-empty">No results found</div>
-          ) : (
-            filtered.map(country => (
-              <div key={country.name} className="location-country-group">
-                <div className="location-country-name">{country.name}</div>
-                <div className="location-cities">
-                  {country.cities.map(city => (
-                    <button
-                      key={city}
-                      type="button"
-                      className={`location-city-btn ${selectedOriginCountry?.name === country.name && originValue === `${city}, ${country.name}` ? 'selected' : ''}`}
-                      onMouseDown={e => e.preventDefault()}
-                      onClick={() => onSelect(city, country.name)}
-                    >
-                      {city}
-                    </button>
-                  ))}
+  ) => {
+    const currentValue = type === 'origin' ? originValue : destinationValue;
+    return (
+      <div className="location-dropdown-wrapper">
+        <input
+          type="text"
+          placeholder="Search country or city..."
+          value={search}
+          onChange={e => { setSearch(e.target.value); setShow(true); }}
+          onFocus={() => setShow(true)}
+          onBlur={() => setTimeout(() => setShow(false), 200)}
+        />
+        {show && (
+          <div className="location-dropdown">
+            {filtered.length === 0 ? (
+              <div className="location-dropdown-empty">No results found</div>
+            ) : (
+              filtered.map(country => (
+                <div key={country.name} className="location-country-group">
+                  <div className="location-country-name">{country.name}</div>
+                  <div className="location-cities">
+                    {country.cities.map(city => (
+                      <button
+                        key={city}
+                        type="button"
+                        className={`location-city-btn ${selectedCountry?.name === country.name && currentValue === `${city}, ${country.name}` ? 'selected' : ''}`}
+                        onMouseDown={e => e.preventDefault()}
+                        onClick={() => onSelect(city, country.name)}
+                      >
+                        {city}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))
-          )}
-        </div>
-      )}
-    </div>
-  );
+              ))
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -205,12 +209,37 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
           </div>
           <button className="btn-close" onClick={onClose} aria-label="Close">{'\u2715'}</button>
         </div>
+
+        {/* Summary Bar */}
+        {(validQuotes.length > 0 || autoSavings !== null) && (
+          <div className="form-summary-bar">
+            {lowestAmount > 0 && (
+              <div className="summary-item">
+                <span className="summary-label">Lowest Quote</span>
+                <span className="summary-value summary-lowest">AED {new Intl.NumberFormat('en-US').format(lowestAmount)}</span>
+              </div>
+            )}
+            {autoSavings !== null && (
+              <div className="summary-item">
+                <span className="summary-label">Savings</span>
+                <span className="summary-value summary-savings">AED {new Intl.NumberFormat('en-US').format(autoSavings)}</span>
+              </div>
+            )}
+            {lowestAmount > 0 && (
+              <div className="summary-item">
+                <span className="summary-label">Freight %</span>
+                <span className="summary-value summary-pct">{percentage}%</span>
+              </div>
+            )}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-          {/* Section: PO Details */}
+          {/* Section: Details */}
           <div className="form-section">
             <div className="form-section-header">
               <span className="section-icon">{'\uD83D\uDCCB'}</span>
-              <span>PO Details</span>
+              <span>Details</span>
             </div>
             <div className="form-grid form-grid-3">
               <div className="form-group">
@@ -219,36 +248,36 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
                   {ENTITIES.map(e => <option key={e} value={e}>{e}</option>)}
                 </select>
               </div>
-              <div className="form-group">
-                <label htmlFor="supplierName">{'\uD83C\uDFED'} Supplier Name</label>
-                <input id="supplierName" type="text" placeholder="Enter supplier name" {...register('supplierName')} />
-                {errors.supplierName && <span className="error-text">{'\u26A0\uFE0F'} {errors.supplierName.message}</span>}
+              <div className="form-group form-group-wide">
+                <label htmlFor="supplierName">{'\uD83C\uDFED'} Supplier</label>
+                <input id="supplierName" type="text" placeholder="Supplier name" {...register('supplierName')} />
+                {errors.supplierName && <span className="error-text">{errors.supplierName.message}</span>}
               </div>
               <div className="form-group">
-                <label htmlFor="supplierPO">{'\uD83D\uDCE0'} Supplier PO</label>
-                <input id="supplierPO" type="text" placeholder="e.g. P227998" {...register('supplierPO')} />
-                {errors.supplierPO && <span className="error-text">{'\u26A0\uFE0F'} {errors.supplierPO.message}</span>}
+                <label htmlFor="supplierPO">{'\uD83D\uDCE0'} PO Number</label>
+                <input id="supplierPO" type="text" placeholder="P227998" {...register('supplierPO')} />
+                {errors.supplierPO && <span className="error-text">{errors.supplierPO.message}</span>}
               </div>
               <div className="form-group">
                 <label htmlFor="poValue">{'\uD83D\uDCB0'} PO Value (AED)</label>
                 <input id="poValue" type="number" step="0.01" placeholder="0.00" {...register('poValue')} />
-                {errors.poValue && <span className="error-text">{'\u26A0\uFE0F'} {errors.poValue.message}</span>}
+                {errors.poValue && <span className="error-text">{errors.poValue.message}</span>}
               </div>
               <div className="form-group">
                 <label htmlFor="mode">{'\uD83D\uDEE2\uFE0F'} Mode</label>
                 <select id="mode" {...register('mode')}>
-                  <option value="">-- Select Mode --</option>
+                  <option value="">Select</option>
                   {MODES_LIST.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
                 </select>
-                {errors.mode && <span className="error-text">{'\u26A0\uFE0F'} {errors.mode.message}</span>}
+                {errors.mode && <span className="error-text">{errors.mode.message}</span>}
               </div>
               <div className="form-group">
                 <label htmlFor="incoterms">{'\uD83C\uDF10'} Incoterms</label>
                 <select id="incoterms" {...register('incoterms')}>
-                  <option value="">-- Select Incoterms --</option>
+                  <option value="">Select</option>
                   {INCOTERMS_LIST.map(i => <option key={i.value} value={i.value}>{i.label}</option>)}
                 </select>
-                {errors.incoterms && <span className="error-text">{'\u26A0\uFE0F'} {errors.incoterms.message}</span>}
+                {errors.incoterms && <span className="error-text">{errors.incoterms.message}</span>}
               </div>
             </div>
           </div>
@@ -257,26 +286,28 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
           <div className="form-section">
             <div className="form-section-header">
               <span className="section-icon">{'\uD83D\uDDFA\uFE0F'}</span>
-              <span>Route & Shipment</span>
+              <span>Route</span>
             </div>
             <div className="form-grid form-grid-2">
               <div className="form-group">
                 <label>{'\uD83D\uDCCD'} Origin</label>
                 {renderLocationDropdown('origin', originSearch, setOriginSearch, showOriginDropdown, setShowOriginDropdown, filteredOrigins, selectedOriginCountry, handleOriginCitySelect)}
-                {errors.origin && <span className="error-text">{'\u26A0\uFE0F'} {errors.origin.message}</span>}
+                {errors.origin && <span className="error-text">{errors.origin.message}</span>}
               </div>
               <div className="form-group">
                 <label>{'\uD83C\uDFDF\uFE0F'} Destination</label>
                 {renderLocationDropdown('destination', destinationSearch, setDestinationSearch, showDestinationDropdown, setShowDestinationDropdown, filteredDestinations, selectedDestCountry, handleDestCitySelect)}
-                {errors.destination && <span className="error-text">{'\u26A0\uFE0F'} {errors.destination.message}</span>}
+                {errors.destination && <span className="error-text">{errors.destination.message}</span>}
+              </div>
+            </div>
+            <div className="form-grid form-grid-4" style={{ marginTop: '12px' }}>
+              <div className="form-group">
+                <label htmlFor="size">{'\uD83D\uDCE6'} Size</label>
+                <input id="size" type="text" placeholder="1x40 HQ" {...register('size')} />
               </div>
               <div className="form-group">
-                <label htmlFor="size">{'\uD83D\uDCE6'} Size / Qty</label>
-                <input id="size" type="text" placeholder="e.g. 1 x 40ft HQ" {...register('size')} />
-              </div>
-              <div className="form-group">
-                <label htmlFor="transitTime">{'\u23F1\uFE0F'} Transit Time</label>
-                <input id="transitTime" type="text" placeholder="e.g. 30 Days" {...register('transitTime')} />
+                <label htmlFor="transitTime">{'\u23F1\uFE0F'} Transit</label>
+                <input id="transitTime" type="text" placeholder="30 Days" {...register('transitTime')} />
               </div>
               <div className="form-group">
                 <label htmlFor="etd">{'\u2693\uFE0F'} ETD</label>
@@ -294,11 +325,12 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
             <div className="form-section-header">
               <span className="section-icon">{'\uD83D\uDCB3'}</span>
               <span>Forwarder Quotes</span>
+              <span className="section-count">{validQuotes.length} of {fields.length}</span>
             </div>
             <div className="quotes-grid">
               {fields.map((field, index) => (
                 <div key={field.id} className={`quote-card ${awardedTo === field.forwarder ? 'quote-card-active' : ''}`}>
-                  <div className="quote-card-header">
+                  <div className="quote-card-row">
                     <select
                       className="quote-card-forwarder-select"
                       {...register(`quotes.${index}.forwarder`)}
@@ -308,36 +340,36 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
                         <option key={f.id} value={f.name}>{f.name}</option>
                       ))}
                     </select>
-                    {awardedTo === field.forwarder && <span className="quote-card-badge">{'\u2B50'} Awarded</span>}
+                    <div className="quote-card-input">
+                      <span className="quote-card-currency">AED</span>
+                      <input
+                        id={`quotes.${index}.quotedAmount`}
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        {...register(`quotes.${index}.quotedAmount` as const)}
+                      />
+                    </div>
+                    {fields.length > 1 && (
+                      <button type="button" className="quote-card-remove" onClick={() => remove(index)} title="Remove">
+                        {'\u2715'}
+                      </button>
+                    )}
                   </div>
-                  <div className="quote-card-input">
-                    <span className="quote-card-currency">AED</span>
-                    <input
-                      id={`quotes.${index}.quotedAmount`}
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      {...register(`quotes.${index}.quotedAmount` as const)}
-                    />
-                  </div>
-                  {fields.length > 1 && (
-                    <button type="button" className="quote-card-remove" onClick={() => remove(index)}>
-                      {'\u2715'} Remove
-                    </button>
-                  )}
+                  {awardedTo === field.forwarder && <span className="quote-card-badge">{'\u2B50'} Awarded</span>}
                 </div>
               ))}
             </div>
             <button type="button" className="btn btn-add-forwarder" onClick={handleAddForwarder}>
-              {'\u2795'} Add Forwarder Quote
+              {'\u2795'} Add Quote
             </button>
           </div>
 
-          {/* Section: Award & Remarks */}
+          {/* Section: Award */}
           <div className="form-section">
             <div className="form-section-header">
               <span className="section-icon">{'\uD83C\uDFC6'}</span>
-              <span>Award & Remarks</span>
+              <span>Award</span>
             </div>
             <div className="form-grid form-grid-3">
               <div className="form-group">
@@ -349,33 +381,24 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
               <div className="form-group">
                 <label htmlFor="awardedTo">{'\u2B50'} Awarded To</label>
                 <select id="awardedTo" {...register('awardedTo')}>
-                  <option value="">-- Select Forwarder --</option>
+                  <option value="">-- Select --</option>
                   {forwarders.map(f => (
                     <option key={f.id} value={f.name}>{f.name}</option>
                   ))}
                 </select>
               </div>
               <div className="form-group">
-                <label>{'\uD83D\uDCCA'} Lowest Quote %</label>
-                <div className="percentage-display">
-                  <div className="percentage-bar">
-                    <div className="percentage-fill" style={{ width: `${Math.min(Number(percentage), 100)}%` }} />
-                  </div>
-                  <span className="percentage-value">{percentage}%</span>
-                </div>
-              </div>
-              <div className="form-group">
                 <label htmlFor="savings">{'\uD83D\uDCB0'} Savings (AED)</label>
                 {autoSavings !== null ? (
                   <input id="savings" type="text" readOnly value={`AED ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(autoSavings)} (auto)`} className="savings-auto" />
                 ) : (
-                  <input id="savings" type="number" step="0.01" placeholder="Enter manually (1 quote only)" {...register('savings')} />
+                  <input id="savings" type="number" step="0.01" placeholder="Manual (1 quote)" {...register('savings')} />
                 )}
               </div>
-              <div className="form-group">
-                <label htmlFor="remarks">{'\uD83D\uDCDD'} Remarks</label>
-                <input id="remarks" type="text" placeholder="Optional notes" {...register('remarks')} />
-              </div>
+            </div>
+            <div className="form-group" style={{ marginTop: '12px' }}>
+              <label htmlFor="remarks">{'\uD83D\uDCDD'} Remarks</label>
+              <input id="remarks" type="text" placeholder="Optional notes" maxLength={500} {...register('remarks')} />
             </div>
           </div>
 

@@ -14,21 +14,32 @@ export function useStore() {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [forwarders, setForwarders] = useState<Forwarder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     (async () => {
       try {
         const [qData, fData] = await Promise.all([
           fetchQuotations(),
           fetchForwarders(),
         ]);
-        setQuotations(qData);
-        setForwarders(fData);
+        if (!controller.signal.aborted) {
+          setQuotations(qData);
+          setForwarders(fData);
+        }
       } catch (err) {
-        console.error('Failed to load from Supabase:', err);
+        if (!controller.signal.aborted) {
+          const msg = err instanceof Error ? err.message : 'Failed to load data';
+          setError(msg);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
-      setLoading(false);
     })();
+    return () => controller.abort();
   }, []);
 
   const addQuotation = useCallback(async (input: QuotationInput) => {
@@ -65,5 +76,6 @@ export function useStore() {
     addForwarder,
     deleteForwarder,
     loading,
+    error,
   };
 }

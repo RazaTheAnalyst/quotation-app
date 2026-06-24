@@ -3,8 +3,8 @@ import type { Forwarder } from '../types';
 
 interface ForwardersProps {
   forwarders: Forwarder[];
-  onAdd: (data: Omit<Forwarder, 'id'>) => void;
-  onDelete: (id: number) => void;
+  onAdd: (data: Omit<Forwarder, 'id'>) => Promise<void>;
+  onDelete: (id: number) => Promise<void>;
 }
 
 export default function Forwarders({ forwarders, onAdd, onDelete }: ForwardersProps) {
@@ -13,16 +13,29 @@ export default function Forwarders({ forwarders, onAdd, onDelete }: ForwardersPr
   const [contactPerson, setContactPerson] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    onAdd({ name: name.trim(), contactPerson: contactPerson.trim(), email: email.trim(), phone: phone.trim() });
-    setName('');
-    setContactPerson('');
-    setEmail('');
-    setPhone('');
-    setShowForm(false);
+    const duplicate = forwarders.some(f => f.name.toLowerCase() === name.trim().toLowerCase());
+    if (duplicate) {
+      window.confirm(`A forwarder named "${name.trim()}" already exists.`);
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await onAdd({ name: name.trim(), contactPerson: contactPerson.trim(), email: email.trim(), phone: phone.trim() });
+      setName('');
+      setContactPerson('');
+      setEmail('');
+      setPhone('');
+      setShowForm(false);
+    } catch (err) {
+      console.error('Failed to add forwarder:', err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -88,7 +101,7 @@ export default function Forwarders({ forwarders, onAdd, onDelete }: ForwardersPr
             </div>
             <div className="forwarders-form-actions">
               <button type="button" className="btn btn-cancel-sm" onClick={() => setShowForm(false)}>Cancel</button>
-              <button type="submit" className="btn btn-primary">Add Forwarder</button>
+              <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? 'Adding...' : 'Add Forwarder'}</button>
             </div>
           </form>
         </div>
@@ -113,8 +126,14 @@ export default function Forwarders({ forwarders, onAdd, onDelete }: ForwardersPr
                 <button
                   className="fwd-card-delete"
                   title="Delete forwarder"
-                  onClick={() => {
-                    if (window.confirm(`Delete "${f.name}"?`)) onDelete(f.id);
+                  onClick={async () => {
+                    if (window.confirm(`Delete "${f.name}"?`)) {
+                      try {
+                        await onDelete(f.id);
+                      } catch (err) {
+                        console.error('Delete failed:', err);
+                      }
+                    }
                   }}
                 >
                   {'\u2715'}

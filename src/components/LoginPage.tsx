@@ -13,10 +13,14 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
 
-    const result = await signIn(email, password);
-    if (result.error) setError(result.error);
-
-    setLoading(false);
+    try {
+      const result = await signIn(email, password);
+      if (result.error) setError(result.error);
+    } catch {
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

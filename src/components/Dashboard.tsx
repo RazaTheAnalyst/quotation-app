@@ -7,16 +7,17 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ quotations, forwarders }: DashboardProps) {
-  const totalPOValue = quotations.reduce((sum, q) => sum + q.poValue, 0);
+  const safeNum = (v: number) => (Number.isFinite(v) ? v : 0);
+  const totalPOValue = safeNum(quotations.reduce((sum, q) => sum + (Number.isFinite(q.poValue) ? q.poValue : 0), 0));
   const totalQuotations = quotations.length;
 
-  const totalFreightSpending = quotations.reduce((sum, q) => {
+  const totalFreightSpending = safeNum(quotations.reduce((sum, q) => {
     if (!q.awardedTo) return sum;
     const awardedQuote = q.quotes.find(qu => qu.forwarder === q.awardedTo);
     return sum + (awardedQuote?.quotedAmount ?? 0);
-  }, 0);
+  }, 0));
 
-  const totalSavings = quotations.reduce((sum, q) => sum + (q.savings ?? 0), 0);
+  const totalSavings = safeNum(quotations.reduce((sum, q) => sum + (q.savings ?? 0), 0));
 
   const freightVsPO = totalPOValue > 0
     ? ((totalFreightSpending / totalPOValue) * 100).toFixed(1)

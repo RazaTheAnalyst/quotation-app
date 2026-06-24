@@ -27,7 +27,7 @@ export const COUNTRIES: Country[] = [
   { name: 'Bosnia and Herzegovina', cities: ['Sarajevo', 'Banja Luka', 'Tuzla'] },
   { name: 'Botswana', cities: ['Gaborone', 'Francistown', 'Maun'] },
   { name: 'Brazil', cities: ['São Paulo', 'Rio de Janeiro', 'Brasília', 'Salvador', 'Fortaleza', 'Belo Horizonte', 'Manaus', 'Curitiba'] },
-  { name: 'Brunei', cities: ['Bandar Seri Begawan', 'Miri'] },
+  { name: 'Brunei', cities: ['Bandar Seri Begawan'] },
   { name: 'Bulgaria', cities: ['Sofia', 'Plovdiv', 'Varna', 'Burgas'] },
   { name: 'Burkina Faso', cities: ['Ouagadougou', 'Bobo-Dioulasso'] },
   { name: 'Burundi', cities: ['Gitega', 'Bujumbura'] },

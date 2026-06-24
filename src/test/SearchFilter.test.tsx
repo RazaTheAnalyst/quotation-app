@@ -6,7 +6,7 @@ import type { Filters } from '../types';
 
 describe('SearchFilter', () => {
   const mockOnChange = vi.fn();
-  const defaultFilters: Filters = { search: '', entity: '', awardedTo: '' };
+  const defaultFilters: Filters = { search: '', entity: '', status: '' };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -14,7 +14,7 @@ describe('SearchFilter', () => {
 
   it('renders search input', () => {
     render(<SearchFilter filters={defaultFilters} onFilterChange={mockOnChange} />);
-    expect(screen.getByPlaceholderText(/\u{1F50D}.*Search supplier, PO, remarks\.\.\./u)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Search supplier, PO, forwarder/)).toBeInTheDocument();
   });
 
   it('renders entity dropdown with options', () => {
@@ -36,7 +36,7 @@ describe('SearchFilter', () => {
   it('calls onFilterChange when search input changes', async () => {
     const user = userEvent.setup();
     render(<SearchFilter filters={defaultFilters} onFilterChange={mockOnChange} />);
-    await user.type(screen.getByPlaceholderText(/\u{1F50D}.*Search supplier, PO, remarks\.\.\./u), 'test');
+    await user.type(screen.getByPlaceholderText(/Search supplier, PO, forwarder/), 'test');
     expect(mockOnChange).toHaveBeenCalled();
   });
 });

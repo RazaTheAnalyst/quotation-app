@@ -38,16 +38,10 @@ export type QuotationInput = Omit<Quotation, 'id' | 'percentage'>;
 export interface Filters {
   search: string;
   entity: string;
-  awardedTo: string;
+  status: string;
 }
 
-export const FORWARDERS = ['BDP', 'ECU', 'Expeditors'] as const;
-
 export const ENTITIES = ['UAE', 'Qatar', 'Oman', 'KSA'] as const;
-
-export const MODES = ['SEA FCL', 'SEA LCL', 'Air', 'Road'] as const;
-
-export const INCOTERMS = ['Exworks', 'FOB', 'CIF', 'DDP'] as const;
 
 export const STATUS_LIST = [
   'Pending',

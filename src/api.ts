@@ -1,7 +1,7 @@
 import type { Quotation, QuotationInput, Forwarder } from './types';
 import { supabase } from './supabase';
 
-// ─── Row types (snake_case from Supabase) ───
+// --- Row types (snake_case from Supabase) ---
 interface QuotationRow {
   id: number;
   entity: string;
@@ -32,7 +32,7 @@ interface ForwarderRow {
   phone: string;
 }
 
-// ─── Mappers ───
+// --- Mappers ---
 function rowToQuotation(row: QuotationRow): Quotation {
   return {
     id: row.id,
@@ -99,32 +99,46 @@ function forwarderInputToRow(data: Omit<Forwarder, 'id'>) {
   };
 }
 
-function computePercentage(data: QuotationInput): number {
+function safeMin(arr: number[]): number {
+  if (arr.length === 0) return 0;
+  let min = Infinity;
+  for (const v of arr) { if (v < min) min = v; }
+  return min;
+}
+
+function safeMax(arr: number[]): number {
+  if (arr.length === 0) return 0;
+  let max = -Infinity;
+  for (const v of arr) { if (v > max) max = v; }
+  return max;
+}
+
+function computePercentage(data: { poValue?: number; quotes?: { forwarder: string; quotedAmount: number }[] }): number {
   const poValue = data.poValue ?? 0;
   if (poValue <= 0) return 0;
   const validQuotes = (data.quotes ?? []).filter(q => q.quotedAmount > 0);
   if (validQuotes.length === 0) return 0;
-  const lowestAmount = Math.min(...validQuotes.map(q => q.quotedAmount));
+  const lowestAmount = safeMin(validQuotes.map(q => q.quotedAmount));
   return Math.round((lowestAmount / poValue) * 10000) / 100;
 }
 
-function computeSavings(data: QuotationInput): number {
+function computeSavings(data: { quotes?: { forwarder: string; quotedAmount: number }[]; savings?: number }, manualSavings?: number): number {
   const validQuotes = (data.quotes ?? []).filter(q => q.quotedAmount > 0);
-  if (validQuotes.length < 2) return data.savings ?? 0;
+  if (validQuotes.length < 2) return manualSavings ?? data.savings ?? 0;
   const amounts = validQuotes.map(q => q.quotedAmount);
-  const highest = Math.max(...amounts);
-  const lowest = Math.min(...amounts);
+  const highest = safeMax(amounts);
+  const lowest = safeMin(amounts);
   return Math.round((highest - lowest) * 100) / 100;
 }
 
-// ─── Quotations API ───
+// --- Quotations API ---
 export async function fetchQuotations(): Promise<Quotation[]> {
   const { data, error } = await supabase
     .from('quotations')
     .select('*')
     .order('id', { ascending: true });
   if (error) throw error;
-  return (data as QuotationRow[]).map(rowToQuotation);
+  return (data ?? []).map(rowToQuotation);
 }
 
 export async function createQuotation(input: QuotationInput): Promise<Quotation> {
@@ -136,10 +150,26 @@ export async function createQuotation(input: QuotationInput): Promise<Quotation>
     .select()
     .single();
   if (error) throw error;
+  if (!data) throw new Error('No data returned from create');
   return rowToQuotation(data as QuotationRow);
 }
 
 export async function updateQuotationAPI(id: number, input: Partial<QuotationInput> & { percentage?: number }): Promise<Quotation> {
+  // First fetch the existing record to merge partial updates
+  const { data: existing, error: fetchError } = await supabase
+    .from('quotations')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (fetchError) throw fetchError;
+  if (!existing) throw new Error('Quotation not found');
+
+  const existingRow = existing as QuotationRow;
+
+  // Build merged data for recomputation
+  const mergedQuotes = input.quotes !== undefined ? input.quotes : (existingRow.quotes ?? []);
+  const mergedPoValue = input.poValue !== undefined ? input.poValue : existingRow.po_value;
+
   const row: Record<string, unknown> = {};
   if (input.entity !== undefined) row.entity = input.entity;
   if (input.supplierName !== undefined) row.supplier_name = input.supplierName;
@@ -160,9 +190,10 @@ export async function updateQuotationAPI(id: number, input: Partial<QuotationInp
   if (input.status !== undefined) row.status = input.status;
   if (input.savings !== undefined) row.savings = input.savings;
 
+  // Recompute percentage and savings using merged data
   if (input.quotes !== undefined || input.poValue !== undefined) {
-    const percentage = computePercentage(input as QuotationInput);
-    const savings = computeSavings(input as QuotationInput);
+    const percentage = computePercentage({ quotes: mergedQuotes, poValue: mergedPoValue });
+    const savings = computeSavings({ quotes: mergedQuotes }, input.savings);
     row.percentage = percentage;
     row.savings = savings;
   }
@@ -174,6 +205,7 @@ export async function updateQuotationAPI(id: number, input: Partial<QuotationInp
     .select()
     .single();
   if (error) throw error;
+  if (!data) throw new Error('No data returned from update');
   return rowToQuotation(data as QuotationRow);
 }
 
@@ -185,14 +217,14 @@ export async function deleteQuotationAPI(id: number): Promise<void> {
   if (error) throw error;
 }
 
-// ─── Forwarders API ───
+// --- Forwarders API ---
 export async function fetchForwarders(): Promise<Forwarder[]> {
   const { data, error } = await supabase
     .from('forwarders')
     .select('*')
     .order('id', { ascending: true });
   if (error) throw error;
-  return (data as ForwarderRow[]).map(rowToForwarder);
+  return (data ?? []).map(rowToForwarder);
 }
 
 export async function createForwarderAPI(data: Omit<Forwarder, 'id'>): Promise<Forwarder> {
@@ -202,6 +234,7 @@ export async function createForwarderAPI(data: Omit<Forwarder, 'id'>): Promise<F
     .select()
     .single();
   if (error) throw error;
+  if (!row) throw new Error('No data returned from create');
   return rowToForwarder(row as ForwarderRow);
 }
 

@@ -20,33 +20,37 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
     new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
 
   const exportToExcel = () => {
-    const data = quotations.map(q => ({
-      Entity: q.entity,
-      Supplier: q.supplierName,
-      'PO Number': q.supplierPO,
-      'PO Value (AED)': q.poValue,
-      Origin: q.origin,
-      Destination: q.destination,
-      Mode: q.mode,
-      Size: q.size,
-      'Transit Time': q.transitTime,
-      ETD: q.etd,
-      ETA: q.eta,
-      Incoterms: q.incoterms,
-      Status: q.status,
-      'Freight %': q.percentage,
-      'Savings (AED)': q.savings,
-      'Awarded To': q.awardedTo || '-',
-      ...forwarders.reduce((acc, f) => {
-        const quote = q.quotes.find(qu => qu.forwarder === f.name);
-        acc[f.name] = quote?.quotedAmount || 0;
-        return acc;
-      }, {} as Record<string, number>),
-    }));
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Quotations');
-    XLSX.writeFile(wb, `Quotations_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    try {
+      const data = quotations.map(q => ({
+        Entity: q.entity,
+        Supplier: q.supplierName,
+        'PO Number': q.supplierPO,
+        'PO Value (AED)': q.poValue,
+        Origin: q.origin,
+        Destination: q.destination,
+        Mode: q.mode,
+        Size: q.size,
+        'Transit Time': q.transitTime,
+        ETD: q.etd,
+        ETA: q.eta,
+        Incoterms: q.incoterms,
+        Status: q.status,
+        'Freight %': q.percentage,
+        'Savings (AED)': q.savings,
+        'Awarded To': q.awardedTo || '-',
+        ...forwarders.reduce((acc, f) => {
+          const quote = q.quotes.find(qu => qu.forwarder === f.name);
+          acc[f.name] = quote?.quotedAmount || 0;
+          return acc;
+        }, {} as Record<string, number>),
+      }));
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Quotations');
+      XLSX.writeFile(wb, `Quotations_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    } catch (err) {
+      console.error('Excel export failed:', err);
+    }
   };
 
   const toggleRow = (id: number) => {
@@ -76,6 +80,8 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
     if (mode.includes('SEA')) return '\u26F5';
     if (mode === 'Air') return '\u2708\uFE0F';
     if (mode === 'Road') return '\uD83D\uDE9B';
+    if (mode === 'Rail') return '\uD83D\uDE82';
+    if (mode === 'Multi-modal') return '\uD83D\uDEE2\uFE0F';
     return '\uD83D\uDCE6';
   };
 
@@ -164,7 +170,7 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
                           ))}
                         </select>
                       </td>
-                      <td className="num">{q.percentage}%</td>
+                      <td className="num">{Number.isFinite(q.percentage) ? q.percentage : 0}%</td>
                       <td className="num td-savings">{q.savings > 0 ? fmt(q.savings) : '-'}</td>
                     </tr>
                     {isExpanded && (
@@ -266,28 +272,28 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
               </button>
               {mobileExpandedCards.has(q.id) && (
                 <div className="card-quotes">
-                  {forwarders.map(fwd => {
-                    const quote = q.quotes.find(qu => qu.forwarder === fwd.name);
+                  {q.quotes.filter(qt => qt.quotedAmount > 0).map(qt => {
                     return (
-                      <div key={fwd.id} className={`card-quote ${getAwardClass(fwd.name, q.awardedTo)}`}>
-                        <span className="card-quote-name">{fwd.name}</span>
-                        <span className="card-quote-value">{quote ? fmt(quote.quotedAmount) : '-'}</span>
-                        {quote && quote.quotedAmount > 0 && (
-                          <button
-                            className="btn-award"
-                            title={`Award to ${fwd.name}`}
-                            onClick={() => onAward(q.id, fwd.name)}
-                          >
-                            {q.awardedTo === fwd.name ? '\u2605' : '\u2606'}
-                          </button>
-                        )}
+                      <div key={qt.forwarder} className={`card-quote ${getAwardClass(qt.forwarder, q.awardedTo)}`}>
+                        <span className="card-quote-name">{qt.forwarder}</span>
+                        <span className="card-quote-value">{fmt(qt.quotedAmount)}</span>
+                        <button
+                          className="btn-award"
+                          title={`Award to ${qt.forwarder}`}
+                          onClick={() => onAward(q.id, qt.forwarder)}
+                        >
+                          {q.awardedTo === qt.forwarder ? '\u2605' : '\u2606'}
+                        </button>
                       </div>
                     );
                   })}
+                  {q.quotes.filter(qt => qt.quotedAmount > 0).length === 0 && (
+                    <div className="card-quote-empty">No quotes yet</div>
+                  )}
                 </div>
               )}
               <div className="card-footer">
-                <span className="card-pct">{q.percentage}%</span>
+                <span className="card-pct">{Number.isFinite(q.percentage) ? q.percentage : 0}%</span>
                 <div className="card-actions">
                   <button className="btn btn-sm btn-edit" onClick={() => onEdit(q)}>{'\u270F\uFE0F'} Edit</button>
                   <button className="btn btn-sm btn-delete" onClick={() => onDelete(q.id)}>{'\uD83D\uDDD1\uFE0F'} Delete</button>
