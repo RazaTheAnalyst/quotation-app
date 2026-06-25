@@ -16,31 +16,46 @@ export default function SearchFilter({ filters, onFilterChange, resultCount, tot
   const hasActiveFilters = filters.search || filters.entity || filters.status;
 
   return (
-    <div className="search-filter">
-      <div className="search-input-wrapper">
-        <span className="search-input-icon">{'\uD83D\uDD0D'}</span>
+    <div className="flex flex-wrap gap-3 items-center">
+      <div className="relative flex-1 min-w-[200px]">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]">
+          {'\uD83D\uDD0D'}
+        </span>
         <input
           type="text"
           placeholder="Search supplier, PO, forwarder, mode, origin..."
           value={filters.search}
           onChange={(e) => handleChange('search', e.target.value)}
+          className="w-full pl-10 pr-10 py-2 rounded-lg border border-[var(--border)] bg-[var(--card-bg)] text-[var(--text)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-3 focus:ring-[var(--primary-bg)] transition-colors"
         />
         {filters.search && (
-          <button className="search-input-clear" onClick={() => handleChange('search', '')} title="Clear search">
+          <button
+            onClick={() => handleChange('search', '')}
+            title="Clear search"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text)] cursor-pointer transition-colors"
+          >
             {'\u2715'}
           </button>
         )}
       </div>
-      <select value={filters.entity} onChange={(e) => handleChange('entity', e.target.value)}>
+      <select
+        value={filters.entity}
+        onChange={(e) => handleChange('entity', e.target.value)}
+        className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--card-bg)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)] focus:ring-3 focus:ring-[var(--primary-bg)] transition-colors cursor-pointer"
+      >
         <option value="">All Entities</option>
         {ENTITIES.map(e => <option key={e} value={e}>{e}</option>)}
       </select>
-      <select value={filters.status} onChange={(e) => handleChange('status', e.target.value)}>
+      <select
+        value={filters.status}
+        onChange={(e) => handleChange('status', e.target.value)}
+        className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--card-bg)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)] focus:ring-3 focus:ring-[var(--primary-bg)] transition-colors cursor-pointer"
+      >
         <option value="">All Status</option>
         {STATUS_LIST.map(s => <option key={s} value={s}>{s}</option>)}
       </select>
       {hasActiveFilters && resultCount !== undefined && totalCount !== undefined && (
-        <span className="search-result-count">
+        <span className="px-3 py-1 rounded-full text-sm font-medium bg-[var(--primary-bg)] text-[var(--primary)]">
           {resultCount === totalCount ? `${totalCount} total` : `${resultCount} of ${totalCount} found`}
         </span>
       )}

@@ -24,7 +24,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="login-page">
+    <div
+      className="flex items-center justify-center min-h-screen relative overflow-hidden"
+      style={{ background: 'var(--login-page-bg)' }}
+    >
       <div className="login-bg">
         <div className="login-bg-orb login-bg-orb-1" />
         <div className="login-bg-orb login-bg-orb-2" />
@@ -32,7 +35,7 @@ export default function LoginPage() {
       </div>
 
       <div className="login-card">
-        <div className="login-logo">
+        <div className="text-center mb-5">
           <img src="/logo.svg" alt="Logo" className="login-logo-img" />
         </div>
 

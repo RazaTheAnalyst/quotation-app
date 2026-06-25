@@ -10,7 +10,7 @@ import QuotationForm from './components/QuotationForm';
 import SearchFilter from './components/SearchFilter';
 import Forwarders from './components/Forwarders';
 import LoginPage from './components/LoginPage';
-import './App.css';
+import './component-styles.css';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: string }> {
   state = { hasError: false, error: '' };
@@ -158,7 +158,7 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="app">
+      <div className="app min-h-screen min-h-dvh flex flex-col pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
         <div className="loading-container">
           <div className="loading-spinner" />
           <div className="loading-text">Loading quotations...</div>
@@ -168,41 +168,41 @@ function AppContent() {
   }
 
   return (
-    <div className="app">
+    <div className="app min-h-screen min-h-dvh flex flex-col pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       {storeError && (
-        <div className="store-error-banner">
+        <div className="store-error-banner bg-[var(--danger-bg)] text-[var(--danger)] py-3 px-5 text-center text-sm font-medium border-b border-[rgba(248,113,113,0.2)]">
           Error loading data: {storeError}
         </div>
       )}
-      <header className="app-header">
-        <h1>
-          <img src="/logo.svg" alt="Logo" className="header-logo" />
+      <header className="app-header sticky top-0 z-10 flex items-center justify-between bg-[var(--header-bg)] px-5 border-b border-[var(--header-border)] h-[50px] h-[calc(50px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)]">
+        <h1 className="text-sm font-semibold text-[var(--text)] tracking-tight flex items-center gap-2 whitespace-nowrap">
+          <img src="/logo.svg" alt="Logo" className="header-logo w-8 h-8 flex-shrink-0 drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]" />
           Quotation Manager
         </h1>
-        <nav className="header-actions">
-          <NavLink to="/" end className={({ isActive }) => `btn btn-nav ${isActive ? 'active' : ''}`}>
+        <nav className="header-actions flex items-center gap-0 flex-shrink-0 bg-[var(--header-actions-bg)] rounded-[10px] p-[3px] border border-[var(--header-actions-border)]">
+          <NavLink to="/" end className={({ isActive }) => `btn btn-nav ${isActive ? 'active' : ''} px-3.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer border-none text-[var(--btn-text)] transition-all duration-200 tracking-tight whitespace-nowrap inline-flex items-center gap-[5px] bg-transparent min-h-[32px] hover:text-[var(--btn-hover-text)] hover:bg-[var(--btn-hover-bg)]`}>
             Dashboard
           </NavLink>
-          <NavLink to="/quotations" className={({ isActive }) => `btn btn-nav ${isActive ? 'active' : ''}`}>
+          <NavLink to="/quotations" className={({ isActive }) => `btn btn-nav ${isActive ? 'active' : ''} px-3.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer border-none text-[var(--btn-text)] transition-all duration-200 tracking-tight whitespace-nowrap inline-flex items-center gap-[5px] bg-transparent min-h-[32px] hover:text-[var(--btn-hover-text)] hover:bg-[var(--btn-hover-bg)]`}>
             Quotations
           </NavLink>
-          <NavLink to="/forwarders" className={({ isActive }) => `btn btn-nav ${isActive ? 'active' : ''}`}>
+          <NavLink to="/forwarders" className={({ isActive }) => `btn btn-nav ${isActive ? 'active' : ''} px-3.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer border-none text-[var(--btn-text)] transition-all duration-200 tracking-tight whitespace-nowrap inline-flex items-center gap-[5px] bg-transparent min-h-[32px] hover:text-[var(--btn-hover-text)] hover:bg-[var(--btn-hover-bg)]`}>
             Forwarders
           </NavLink>
-          <button className="btn btn-nav btn-nav-add" onClick={handleAdd}>
-            Add Quotation
+          <button className="btn btn-nav btn-nav-add bg-[var(--add-btn-bg)] text-[var(--add-btn-text)] font-semibold ml-1.5 rounded-lg px-3.5 py-1.5 text-xs cursor-pointer border-none transition-all duration-200 tracking-tight whitespace-nowrap inline-flex items-center gap-[5px] min-h-[32px] hover:bg-[var(--add-btn-hover-bg)]" onClick={handleAdd}>
+            {'+ '}Add Quotation
           </button>
-          <div className="user-menu">
-            <span className="user-email">{user?.email}</span>
+          <div className="user-menu flex items-center gap-2 ml-1 pl-2 border-l border-[var(--header-actions-border)]">
+            <span className="user-email text-xs text-[var(--btn-text)] whitespace-nowrap hidden sm:inline">{user?.email}</span>
             <ThemeToggle />
-            <button className="btn btn-signout" onClick={signOut} title="Sign out">
+            <button className="btn btn-signout bg-[var(--signout-bg)] text-[var(--signout-text)] rounded-lg px-2.5 py-1.5 text-xs cursor-pointer border-none transition-all duration-200 hover:bg-[var(--signout-hover-bg)] hover:text-[var(--signout-hover-text)]" onClick={signOut} title="Sign out">
               {'\uD83D\uDEAA'}
             </button>
           </div>
         </nav>
       </header>
 
-      <main className="app-main">
+      <main className="app-main flex-1 py-7 px-8 max-w-full">
         <Routes>
           <Route path="/" element={<Dashboard quotations={quotations} forwarders={forwarders} />} />
           <Route
@@ -232,9 +232,9 @@ function AppContent() {
             }
           />
           <Route path="*" element={
-            <div className="empty-state">
-              <div className="empty-state-icon">{'\uD83D\uDD0D'}</div>
-              <div className="empty-state-text">Page not found</div>
+            <div className="empty-state text-center py-[60px] px-5 text-[var(--text-muted)]">
+              <div className="empty-state-icon text-[48px] mb-4">{'\uD83D\uDD0D'}</div>
+              <div className="empty-state-text text-[15px] font-medium">Page not found</div>
             </div>
           } />
         </Routes>

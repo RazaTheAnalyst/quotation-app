@@ -6,6 +6,31 @@ interface DashboardProps {
   forwarders: Forwarder[];
 }
 
+const ENTITY_GRADIENT: Record<string, string> = {
+  UAE: 'linear-gradient(135deg, rgba(129,140,248,0.08), rgba(34,211,238,0.08))',
+  Qatar: 'linear-gradient(135deg, rgba(167,139,250,0.08), rgba(244,114,182,0.08))',
+  Oman: 'linear-gradient(135deg, rgba(52,211,153,0.08), rgba(52,211,153,0.05))',
+  KSA: 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,191,36,0.05))',
+};
+
+const STAT_TOP_GRADIENT: Record<string, string> = {
+  purple: 'linear-gradient(90deg, var(--purple), var(--primary))',
+  cyan: 'linear-gradient(90deg, var(--cyan), var(--info))',
+  green: 'linear-gradient(90deg, var(--success), var(--success))',
+  amber: 'linear-gradient(90deg, var(--warning), var(--warning))',
+  pink: 'linear-gradient(90deg, var(--pink), var(--pink))',
+};
+
+const STAT_ICON_STYLE: Record<string, { bg: string; color: string }> = {
+  purple: { bg: 'var(--purple-bg)', color: 'var(--purple)' },
+  cyan: { bg: 'var(--cyan-bg)', color: 'var(--cyan)' },
+  green: { bg: 'var(--success-bg)', color: 'var(--success)' },
+  amber: { bg: 'var(--warning-bg)', color: 'var(--warning)' },
+  pink: { bg: 'var(--pink-bg)', color: 'var(--pink)' },
+};
+
+const H3_ACCENT_BAR = { background: 'linear-gradient(180deg, var(--primary), var(--cyan))' };
+
 export default function Dashboard({ quotations, forwarders }: DashboardProps) {
   const safeNum = (v: number) => (Number.isFinite(v) ? v : 0);
   const totalPOValue = safeNum(quotations.reduce((sum, q) => sum + (Number.isFinite(q.poValue) ? q.poValue : 0), 0));
@@ -51,62 +76,91 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
 
+  const statCards: Array<{ key: string; color: string; icon: string; label: string; value: string; sub: string }> = [
+    { key: 'pos', color: 'purple', icon: '\u{1F4CB}', label: 'Total POs', value: String(totalQuotations), sub: `${ENTITIES.length} entities` },
+    { key: 'povalue', color: 'cyan', icon: '\u{1F4B0}', label: 'Total PO Value', value: formatCurrency(totalPOValue), sub: 'AED' },
+    { key: 'freight', color: 'pink', icon: '\u{1F69A}', label: 'Freight Spending', value: formatCurrency(totalFreightSpending), sub: 'AED' },
+    { key: 'pct', color: 'amber', icon: '\u{1F4CA}', label: 'Freight vs PO', value: `${freightVsPO}%`, sub: 'of PO value' },
+    { key: 'savings', color: 'green', icon: '\u{1F4B0}', label: 'Total Savings', value: formatCurrency(totalSavings), sub: 'AED saved' },
+  ];
+
   return (
-    <div className="dashboard">
-      <div className="dashboard-hero">
-        <h2>Quotation Overview</h2>
-        <p>Track and manage your logistics quotations across all entities</p>
+    <div className="flex flex-col gap-7">
+      <div
+        className="relative overflow-hidden rounded-[var(--radius-xl)] px-10 py-9 text-white"
+        style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%)' }}
+      >
+        <h2 className="relative z-10 mb-1.5 text-[28px] font-bold">Quotation Overview</h2>
+        <p className="relative z-10 text-sm" style={{ color: 'var(--text-secondary)' }}>
+          Track and manage your logistics quotations across all entities
+        </p>
       </div>
 
-      <div className="stats-grid stats-grid-6">
-        <div className="stat-card purple">
-          <div className="stat-icon">&#x1F4CB;</div>
-          <div className="stat-label">Total POs</div>
-          <div className="stat-value">{totalQuotations}</div>
-          <div className="stat-sub">{ENTITIES.length} entities</div>
-        </div>
-        <div className="stat-card cyan">
-          <div className="stat-icon">&#x1F4B0;</div>
-          <div className="stat-label">Total PO Value</div>
-          <div className="stat-value">{formatCurrency(totalPOValue)}</div>
-          <div className="stat-sub">AED</div>
-        </div>
-        <div className="stat-card pink">
-          <div className="stat-icon">&#x1F69A;</div>
-          <div className="stat-label">Freight Spending</div>
-          <div className="stat-value">{formatCurrency(totalFreightSpending)}</div>
-          <div className="stat-sub">AED</div>
-        </div>
-        <div className="stat-card amber">
-          <div className="stat-icon">&#x1F4CA;</div>
-          <div className="stat-label">Freight vs PO</div>
-          <div className="stat-value">{freightVsPO}%</div>
-          <div className="stat-sub">of PO value</div>
-        </div>
-        <div className="stat-card green">
-          <div className="stat-icon">&#x1F4B0;</div>
-          <div className="stat-label">Total Savings</div>
-          <div className="stat-value">{formatCurrency(totalSavings)}</div>
-          <div className="stat-sub">AED saved</div>
-        </div>
+      <div className="grid grid-cols-5 gap-4">
+        {statCards.map(sc => {
+          const iconStyle = STAT_ICON_STYLE[sc.color] ?? { bg: 'var(--primary-bg)', color: 'var(--primary)' };
+          return (
+            <div
+              key={sc.key}
+              className="group relative overflow-hidden rounded-[var(--radius-lg)] border p-6 transition-[var(--transition-slow)] hover:-translate-y-0.5 hover:shadow-[var(--card-shadow-hover)]"
+              style={{
+                background: 'var(--card-bg)',
+                borderColor: 'var(--border-light)',
+                boxShadow: 'var(--card-shadow)',
+              }}
+            >
+              <div
+                className="absolute inset-x-0 top-0 h-1"
+                style={{ background: STAT_TOP_GRADIENT[sc.color] }}
+              />
+              <div
+                className="mb-4 flex h-11 w-11 items-center justify-center rounded-[var(--radius)] text-xl"
+                style={{ background: iconStyle.bg, color: iconStyle.color }}
+              >
+                {sc.icon}
+              </div>
+              <div
+                className="mb-1.5 text-xs font-medium uppercase tracking-widest"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                {sc.label}
+              </div>
+              <div className="text-[28px] font-bold tracking-tight">{sc.value}</div>
+              <div className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>{sc.sub}</div>
+            </div>
+          );
+        })}
       </div>
 
-      <div className="dashboard-sections">
-        <div className="stat-section">
-          <h3>Forwarder Performance</h3>
-          <div className="forwarder-bars">
+      <div className="grid grid-cols-2 gap-5">
+        <div
+          className="rounded-[var(--radius-lg)] border p-6"
+          style={{
+            background: 'var(--card-bg)',
+            borderColor: 'var(--border-light)',
+            boxShadow: 'var(--card-shadow)',
+          }}
+        >
+          <h3 className="mb-4 flex items-center gap-2 text-[15px] font-semibold">
+            <span className="inline-block h-[18px] w-1 rounded" style={H3_ACCENT_BAR} />
+            Forwarder Performance
+          </h3>
+          <div className="flex flex-col gap-3.5">
             {forwarderStats.map(f => (
-              <div key={f.forwarder} className="forwarder-bar-item">
-                <div className="forwarder-bar-header">
-                  <span className="forwarder-bar-name">{f.forwarder}</span>
-                  <span className="forwarder-bar-value">
+              <div key={f.forwarder} className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] font-semibold">{f.forwarder}</span>
+                  <span className="text-xs font-medium tabular-nums" style={{ color: 'var(--text-secondary)' }}>
                     {f.count} award{f.count !== 1 ? 's' : ''} &middot; AED {formatCurrency(f.totalValue)}
                   </span>
                 </div>
-                <div className="forwarder-bar-track">
+                <div className="h-2 overflow-hidden rounded" style={{ background: 'var(--bg)' }}>
                   <div
-                    className="forwarder-bar-fill"
-                    style={{ width: `${(f.totalValue / maxForwarderValue) * 100}%` }}
+                    className="h-full rounded transition-[width_0.6s_cubic-bezier(0.4,0,0.2,1)]"
+                    style={{
+                      width: `${(f.totalValue / maxForwarderValue) * 100}%`,
+                      background: 'linear-gradient(90deg, var(--primary), var(--cyan))',
+                    }}
                   />
                 </div>
               </div>
@@ -114,18 +168,44 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
           </div>
         </div>
 
-        <div className="stat-section">
-          <h3>By Entity</h3>
-          <div className="entity-cards">
+        <div
+          className="rounded-[var(--radius-lg)] border p-6"
+          style={{
+            background: 'var(--card-bg)',
+            borderColor: 'var(--border-light)',
+            boxShadow: 'var(--card-shadow)',
+          }}
+        >
+          <h3 className="mb-4 flex items-center gap-2 text-[15px] font-semibold">
+            <span className="inline-block h-[18px] w-1 rounded" style={H3_ACCENT_BAR} />
+            By Entity
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
             {entityStats.map(e => (
-              <div key={e.entity} className={`entity-card entity-${e.entity.toLowerCase()}`}>
-                <div className="entity-card-header">
-                  <span className="entity-card-name">{e.entity}</span>
-                  <span className="entity-card-count">{e.count} POs</span>
+              <div
+                key={e.entity}
+                className="rounded-[var(--radius)] border-2 p-4 transition-[var(--transition)] hover:border-[var(--primary-light)]"
+                style={{
+                  background: ENTITY_GRADIENT[e.entity],
+                  borderColor: 'var(--border-light)',
+                }}
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-base font-bold">{e.entity}</span>
+                  <span
+                    className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+                    style={{ background: 'var(--primary-bg)', color: 'var(--primary)' }}
+                  >
+                    {e.count} POs
+                  </span>
                 </div>
-                <div className="entity-card-value">AED {formatCurrency(e.totalValue)}</div>
-                <div className="entity-card-freight">Freight: AED {formatCurrency(e.freight)}</div>
-                <div className="entity-card-pct">{e.freightPct}% of PO Value</div>
+                <div className="text-xl font-bold tracking-tight">AED {formatCurrency(e.totalValue)}</div>
+                <div className="mt-1 text-sm font-semibold" style={{ color: 'var(--primary)' }}>
+                  Freight: AED {formatCurrency(e.freight)}
+                </div>
+                <div className="mt-1 text-xs font-semibold" style={{ color: 'var(--primary)' }}>
+                  {e.freightPct}% of PO Value
+                </div>
               </div>
             ))}
           </div>
