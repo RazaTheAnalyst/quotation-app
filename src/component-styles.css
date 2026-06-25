@@ -158,8 +158,7 @@ tr:hover {
 /* ── Row Animation ────────────────────────────── */
 
 .animate-row {
-  animation: rowSlideIn 0.3s ease forwards;
-  opacity: 0;
+  animation: rowSlideIn 0.3s ease both;
 }
 
 /* ── Status Colors ────────────────────────────── */
@@ -1009,8 +1008,7 @@ tr:hover {
 /* ── Form Section Animation ───────────────────── */
 
 .form-section {
-  animation: sectionFadeIn 0.4s ease forwards;
-  opacity: 0;
+  animation: sectionFadeIn 0.4s ease both;
 }
 
 .form-section:nth-child(1) { animation-delay: 0.05s; }
@@ -1021,8 +1019,7 @@ tr:hover {
 /* ── Quote Card Animation ─────────────────────── */
 
 .quote-card {
-  animation: quoteCardIn 0.4s ease forwards;
-  opacity: 0;
+  animation: quoteCardIn 0.4s ease both;
 }
 
 .quote-card:nth-child(1) { animation-delay: 0.15s; }
@@ -1032,8 +1029,7 @@ tr:hover {
 /* ── Mobile Quotation Card Animation ──────────── */
 
 .quotation-card {
-  animation: cardSlideIn 0.3s ease forwards;
-  opacity: 0;
+  animation: cardSlideIn 0.3s ease both;
 }
 
 /* ── Dashboard Hero Pseudo-elements ───────────── */

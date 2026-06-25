@@ -184,14 +184,6 @@ export async function fetchQuotations(): Promise<Quotation[]> {
     .order('id', { ascending: true });
   if (error) throw error;
   const rows = data ?? [];
-  console.log(`[API] Supabase returned ${rows.length} rows. IDs:`, rows.map((r: Record<string, unknown>) => r.id));
-  const shkeRow = rows.find((r: Record<string, unknown>) => r.supplier_name === 'SHKE');
-  if (shkeRow) {
-    console.log('[API] SHKE row found:', shkeRow);
-    console.log('[API] SHKE mapped:', rowToQuotation(shkeRow as QuotationRow));
-  } else {
-    console.warn('[API] SHKE row NOT found in Supabase response');
-  }
   const quotations: Quotation[] = [];
   for (const row of rows) {
     try {

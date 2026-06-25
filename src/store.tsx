@@ -27,9 +27,6 @@ export function useStore() {
         if (!controller.signal.aborted) {
           setQuotations(qData);
           setForwarders(fData);
-          if (qData.length === 0) {
-            console.warn('[Store] No quotations loaded from Supabase');
-          }
         }
       } catch (err) {
         if (!controller.signal.aborted) {
