@@ -16,6 +16,8 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [mobileExpandedCards, setMobileExpandedCards] = useState<Set<number>>(new Set());
 
+  console.log(`[Table] Rendering ${quotations.length} quotations. IDs:`, quotations.map(q => q.id), 'Names:', quotations.map(q => q.supplierName));
+
   const fmt = (val: number) =>
     new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
 
