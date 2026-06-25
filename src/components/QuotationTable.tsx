@@ -135,13 +135,12 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
                 </td>
               </tr>
             ) : (
-              quotations.map((q, i) => {
+              quotations.map((q) => {
                 const isExpanded = expandedRows.has(q.id);
                 return (
                   <Fragment key={q.id}>
                     <tr
-                      style={{ animationDelay: `${i * 30}ms` }}
-                      className={`animate-row quote-row cursor-pointer ${isExpanded ? 'quote-row-expanded' : ''}`}
+                      className={`quote-row cursor-pointer ${isExpanded ? 'quote-row-expanded' : ''}`}
                       onClick={() => toggleRow(q.id)}
                     >
                       <td className="td-expand text-center px-1.5">
@@ -228,8 +227,8 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
             <div className="empty-state-text text-[15px] font-medium">No quotations found</div>
           </div>
         ) : (
-          quotations.map((q, i) => (
-            <div key={q.id} className="quotation-card bg-[var(--card-bg)] rounded-xl border border-[var(--border-light)] shadow-[var(--card-shadow)] p-4" style={{ animationDelay: `${i * 50}ms` }}>
+          quotations.map((q) => (
+            <div key={q.id} className="quotation-card bg-[var(--card-bg)] rounded-xl border border-[var(--border-light)] shadow-[var(--card-shadow)] p-4">
               <div className="card-header flex items-center justify-between mb-2">
                 <span className={`entity-badge inline-flex items-center px-2.5 py-[3px] rounded-full text-[11px] font-bold tracking-[0.04em] uppercase entity-${q.entity.toLowerCase()}`}>{q.entity}</span>
                 <select

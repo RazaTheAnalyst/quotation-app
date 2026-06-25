@@ -126,11 +126,10 @@ export default function Forwarders({ forwarders, onAdd, onDelete }: ForwardersPr
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-4 max-[1200px]:grid-cols-2 max-[900px]:grid-cols-1 max-[600px]:grid-cols-1">
-          {forwarders.map((f, i) => (
+          {forwarders.map((f) => (
             <div
               key={f.id}
-              className="animate-row bg-[var(--card-bg)] rounded-[var(--radius-lg)] border border-[var(--border-light)] shadow-[var(--card-shadow)] p-5 transition-[all_0.3s_cubic-bezier(0.4,0,0.2,1)] relative overflow-hidden hover:-translate-y-0.5 hover:shadow-[var(--card-shadow-hover)] max-[900px]:flex-col max-[900px]:items-start"
-              style={{ animationDelay: `${i * 0.05}s` }}
+              className="bg-[var(--card-bg)] rounded-[var(--radius-lg)] border border-[var(--border-light)] shadow-[var(--card-shadow)] p-5 transition-[all_0.3s_cubic-bezier(0.4,0,0.2,1)] relative overflow-hidden hover:-translate-y-0.5 hover:shadow-[var(--card-shadow-hover)] max-[900px]:flex-col max-[900px]:items-start"
             >
               <div className="flex items-start gap-3.5 mb-4">
                 <div className="w-12 h-12 min-w-[48px] rounded-[14px] bg-gradient-to-br from-[var(--primary)] to-[var(--cyan)] text-white text-xl font-bold flex items-center justify-center tracking-tight">

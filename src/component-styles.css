@@ -157,8 +157,8 @@ tr:hover {
 
 /* ── Row Animation ────────────────────────────── */
 
-.animate-row {
-  animation: rowSlideIn 0.3s ease both;
+.quote-row {
+  transition: background 0.15s ease;
 }
 
 /* ── Status Colors ────────────────────────────── */
