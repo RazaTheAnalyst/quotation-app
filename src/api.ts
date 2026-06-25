@@ -34,14 +34,20 @@ interface ForwarderRow {
 
 // --- Mappers ---
 function rowToQuotation(row: QuotationRow): Quotation {
-  // Handle quotes that might be stored as string or with different key names
+  // Handle quotes that might be stored as string, null, or with different key names
   let parsedQuotes: { forwarder: string; quotedAmount: number }[] = [];
-  if (row.quotes) {
+  if (row.quotes != null) {
     if (typeof row.quotes === 'string') {
       try {
-        parsedQuotes = JSON.parse(row.quotes);
+        const parsed = JSON.parse(row.quotes);
+        if (Array.isArray(parsed)) {
+          parsedQuotes = parsed.map((q: Record<string, unknown>) => ({
+            forwarder: String(q.forwarder ?? ''),
+            quotedAmount: Number(q.quotedAmount ?? q.quoted_amount ?? 0),
+          }));
+        }
       } catch {
-        parsedQuotes = [];
+        // quotes string is not valid JSON, leave as empty
       }
     } else if (Array.isArray(row.quotes)) {
       parsedQuotes = row.quotes.map((q) => {
@@ -177,7 +183,17 @@ export async function fetchQuotations(): Promise<Quotation[]> {
     .select('*')
     .order('id', { ascending: true });
   if (error) throw error;
-  return (data ?? []).map(rowToQuotation);
+  const rows = data ?? [];
+  console.log(`[API] Supabase returned ${rows.length} rows. IDs:`, rows.map((r: Record<string, unknown>) => r.id));
+  const quotations: Quotation[] = [];
+  for (const row of rows) {
+    try {
+      quotations.push(rowToQuotation(row as QuotationRow));
+    } catch (err) {
+      console.error('Failed to map quotation row:', row?.id, err);
+    }
+  }
+  return quotations;
 }
 
 export async function createQuotation(input: QuotationInput): Promise<Quotation> {
