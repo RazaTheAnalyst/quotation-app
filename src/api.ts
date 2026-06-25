@@ -4,66 +4,86 @@ import { supabase } from './supabase';
 // --- Row types (snake_case from Supabase) ---
 interface QuotationRow {
   id: number;
-  entity: string;
-  supplier_name: string;
-  supplier_po: string;
-  po_value: number;
-  origin: string;
-  destination: string;
-  mode: string;
-  size: string;
-  transit_time: string;
-  incoterms: string;
-  quotes: { forwarder: string; quotedAmount: number }[];
-  awarded_to: string;
-  remarks: string;
-  percentage: number;
-  etd: string;
-  eta: string;
-  status: string;
-  savings: number;
+  entity: string | null;
+  supplier_name: string | null;
+  supplier_po: string | null;
+  po_value: number | null;
+  origin: string | null;
+  destination: string | null;
+  mode: string | null;
+  size: string | null;
+  transit_time: string | null;
+  incoterms: string | null;
+  quotes: unknown;
+  awarded_to: string | null;
+  remarks: string | null;
+  percentage: number | null;
+  etd: string | null;
+  eta: string | null;
+  status: string | null;
+  savings: number | null;
 }
 
 interface ForwarderRow {
   id: number;
-  name: string;
-  contact_person: string;
-  email: string;
-  phone: string;
+  name: string | null;
+  contact_person: string | null;
+  email: string | null;
+  phone: string | null;
 }
 
 // --- Mappers ---
 function rowToQuotation(row: QuotationRow): Quotation {
+  // Handle quotes that might be stored as string or with different key names
+  let parsedQuotes: { forwarder: string; quotedAmount: number }[] = [];
+  if (row.quotes) {
+    if (typeof row.quotes === 'string') {
+      try {
+        parsedQuotes = JSON.parse(row.quotes);
+      } catch {
+        parsedQuotes = [];
+      }
+    } else if (Array.isArray(row.quotes)) {
+      parsedQuotes = row.quotes.map((q) => {
+        const obj = q as Record<string, unknown>;
+        return {
+          forwarder: String(obj.forwarder ?? ''),
+          quotedAmount: Number(obj.quotedAmount ?? obj.quoted_amount ?? 0),
+        };
+      });
+    }
+  }
+
   return {
     id: row.id,
-    entity: row.entity,
-    supplierName: row.supplier_name,
-    supplierPO: row.supplier_po,
-    poValue: row.po_value,
-    origin: row.origin,
-    destination: row.destination,
-    mode: row.mode,
-    size: row.size,
-    transitTime: row.transit_time,
-    incoterms: row.incoterms,
-    quotes: row.quotes ?? [],
-    awardedTo: row.awarded_to,
-    remarks: row.remarks,
-    percentage: row.percentage,
+    entity: row.entity ?? '',
+    supplierName: row.supplier_name ?? '',
+    supplierPO: row.supplier_po ?? '',
+    poValue: Number(row.po_value) || 0,
+    origin: row.origin ?? '',
+    destination: row.destination ?? '',
+    mode: row.mode ?? '',
+    size: row.size ?? '',
+    transitTime: row.transit_time ?? '',
+    incoterms: row.incoterms ?? '',
+    quotes: parsedQuotes,
+    awardedTo: row.awarded_to ?? '',
+    remarks: row.remarks ?? '',
+    percentage: Number(row.percentage) || 0,
     etd: row.etd ?? '',
     eta: row.eta ?? '',
     status: row.status ?? 'Pending',
-    savings: row.savings ?? 0,
+    savings: Number(row.savings) || 0,
   };
 }
 
 function rowToForwarder(row: ForwarderRow): Forwarder {
   return {
     id: row.id,
-    name: row.name,
-    contactPerson: row.contact_person,
-    email: row.email,
-    phone: row.phone,
+    name: row.name ?? '',
+    contactPerson: row.contact_person ?? '',
+    email: row.email ?? '',
+    phone: row.phone ?? '',
   };
 }
 
@@ -111,6 +131,25 @@ function safeMax(arr: number[]): number {
   let max = -Infinity;
   for (const v of arr) { if (v > max) max = v; }
   return max;
+}
+
+function normalizeQuotes(raw: unknown): { forwarder: string; quotedAmount: number }[] {
+  if (!raw) return [];
+  let arr: unknown[];
+  if (typeof raw === 'string') {
+    try { arr = JSON.parse(raw); } catch { return []; }
+  } else if (Array.isArray(raw)) {
+    arr = raw;
+  } else {
+    return [];
+  }
+  return arr.map((q) => {
+    const obj = q as Record<string, unknown>;
+    return {
+      forwarder: String(obj.forwarder ?? ''),
+      quotedAmount: Number(obj.quotedAmount ?? obj.quoted_amount ?? 0),
+    };
+  });
 }
 
 function computePercentage(data: { poValue?: number; quotes?: { forwarder: string; quotedAmount: number }[] }): number {
@@ -167,8 +206,8 @@ export async function updateQuotationAPI(id: number, input: Partial<QuotationInp
   const existingRow = existing as QuotationRow;
 
   // Build merged data for recomputation
-  const mergedQuotes = input.quotes !== undefined ? input.quotes : (existingRow.quotes ?? []);
-  const mergedPoValue = input.poValue !== undefined ? input.poValue : existingRow.po_value;
+  const mergedQuotes = input.quotes !== undefined ? input.quotes : normalizeQuotes(existingRow.quotes);
+  const mergedPoValue = input.poValue !== undefined ? input.poValue : (Number(existingRow.po_value) || 0);
 
   const row: Record<string, unknown> = {};
   if (input.entity !== undefined) row.entity = input.entity;
