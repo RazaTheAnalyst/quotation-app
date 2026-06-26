@@ -1,24 +1,23 @@
 <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <!-- 3D Container Shape (Isometric-ish) -->
-  <!-- Top Face -->
-  <path d="M70 50 L160 50 L140 70 L50 70 Z" fill="#2C5282" opacity="0.8"/>
-  <!-- Front Face -->
-  <path d="M50 70 L140 70 L140 130 L50 130 Z" fill="#1A365D"/>
-  <!-- Side Face -->
-  <path d="M140 70 L160 50 L160 110 L140 130 Z" fill="#152C4D"/>
-
-  <!-- Corrugation Lines on Front Face -->
-  <line x1="65" y1="75" x2="65" y2="125" stroke="white" stroke-width="3" stroke-opacity="0.1"/>
-  <line x1="80" y1="75" x2="80" y2="125" stroke="white" stroke-width="3" stroke-opacity="0.1"/>
-  <line x1="95" y1="75" x2="95" y2="125" stroke="white" stroke-width="3" stroke-opacity="0.1"/>
-  <line x1="110" y1="75" x2="110" y2="125" stroke="white" stroke-width="3" stroke-opacity="0.1"/>
-  <line x1="125" y1="75" x2="125" y2="125" stroke="white" stroke-width="3" stroke-opacity="0.1"/>
-
-  <!-- Stylized L (Framing the front face) -->
-  <path d="M60 70 V120 H130" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-
-  <!-- 3D Checkmark sitting on the front plane -->
-  <path d="M90 95 L110 115 L155 70" stroke="#63B3ED" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
-    <title>Checkmark</title>
-  </path>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    <linearGradient id="inner" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect x="10" y="10" width="180" height="180" rx="40" fill="url(#bg)"/>
+  <!-- Document shape -->
+  <path d="M60 50 h55 l25 25 v85 h-80 z" fill="white" opacity="0.95"/>
+  <path d="M115 50 v25 h25" fill="none" stroke="white" stroke-width="1.5" opacity="0.5"/>
+  <!-- Quote lines -->
+  <rect x="72" y="88" width="56" height="4" rx="2" fill="url(#inner)" opacity="0.7"/>
+  <rect x="72" y="100" width="40" height="4" rx="2" fill="url(#inner)" opacity="0.5"/>
+  <!-- Checkmark -->
+  <circle cx="138" cy="138" r="30" fill="url(#inner)"/>
+  <path d="M124 138 l10 10 l20 -22" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 </svg>

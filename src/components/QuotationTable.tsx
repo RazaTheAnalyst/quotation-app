@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import * as XLSX from 'xlsx';
 import { STATUS_LIST } from '../types';
 import type { Quotation, Forwarder } from '../types';
@@ -13,8 +13,7 @@ interface QuotationTableProps {
 }
 
 export default function QuotationTable({ quotations, forwarders, onEdit, onDelete, onAward, onStatusChange }: QuotationTableProps) {
-  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
-  const [mobileExpandedCards, setMobileExpandedCards] = useState<Set<number>>(new Set());
+  const [detailQuotation, setDetailQuotation] = useState<Quotation | null>(null);
 
   const fmt = (val: number) =>
     new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
@@ -53,29 +52,6 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
     }
   };
 
-  const toggleRow = (id: number) => {
-    setExpandedRows(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const toggleMobileCard = (id: number) => {
-    setMobileExpandedCards(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const getAwardClass = (forwarder: string, awardedTo: string) => {
-    if (!awardedTo) return '';
-    return forwarder === awardedTo ? 'awarded' : 'not-awarded';
-  };
-
   const getModeIcon = (mode: string) => {
     if (mode.includes('SEA')) return '\u26F5';
     if (mode === 'Air') return '\u2708\uFE0F';
@@ -94,6 +70,11 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
     return 'status-sent';
   };
 
+  const getAwardClass = (forwarder: string, awardedTo: string) => {
+    if (!awardedTo) return '';
+    return forwarder === awardedTo ? 'awarded' : 'not-awarded';
+  };
+
   return (
     <>
       <div className="table-toolbar flex items-center justify-end gap-3 py-3">
@@ -103,31 +84,26 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
       </div>
       {/* Desktop Table */}
       <div className="table-container desktop-only overflow-x-auto bg-[var(--card-bg)] border border-[var(--border-light)] shadow-[var(--card-shadow)] -mx-5 w-[calc(100%+40px)]">
-        <table className="w-full border-collapse text-[13px]">
+        <table className="responsive-table">
           <thead>
             <tr>
-              <th className="th-expand bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 w-[32px]"></th>
-              <th className="th-entity bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 w-auto">Entity</th>
-              <th className="th-supplier bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 min-w-[110px]">Supplier</th>
-              <th className="th-po bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 min-w-[80px]">PO</th>
-              <th className="th-value num bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 min-w-[90px] text-right font-variant-[tabular-nums]">PO Value</th>
-              <th className="th-route bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 min-w-[80px]">Origin</th>
-              <th className="th-route bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 min-w-[80px]">Dest</th>
-              <th className="th-mode bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 w-auto">Mode</th>
-              <th className="th-size bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 min-w-[80px]">Size</th>
-              <th className="th-transit bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 min-w-[60px]">Transit</th>
-              <th className="th-date bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 min-w-[85px] text-[11px]">ETD</th>
-              <th className="th-date bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 min-w-[85px] text-[11px]">ETA</th>
-              <th className="th-inco bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 w-auto">Inco</th>
-              <th className="th-status bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 w-auto">Status</th>
-              <th className="th-pct num bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 min-w-[45px] text-right font-variant-[tabular-nums]">%</th>
-              <th className="th-savings num bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 min-w-[80px] text-right font-variant-[tabular-nums]">Savings</th>
+              <th className="bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5 w-[32px]"></th>
+              <th className="bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5" data-col="entity">Entity</th>
+              <th className="bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5" data-col="supplier">Supplier</th>
+              <th className="bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5" data-col="po">PO</th>
+              <th className="bg-[var(--card-bg)] px-2.5 py-3 text-right font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5" data-col="value">PO Value</th>
+              <th className="bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5" data-col="origin">Origin</th>
+              <th className="bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5" data-col="dest">Dest</th>
+              <th className="bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5" data-col="mode">Mode</th>
+              <th className="bg-[var(--card-bg)] px-2.5 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5" data-col="status">Status</th>
+              <th className="bg-[var(--card-bg)] px-2.5 py-3 text-right font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5" data-col="pct">%</th>
+              <th className="bg-[var(--card-bg)] px-2.5 py-3 text-right font-semibold text-[11px] uppercase tracking-[0.05em] text-[var(--text-secondary)] whitespace-nowrap border-b-2 border-[var(--border)] sticky top-[52px] z-5" data-col="savings">Savings</th>
             </tr>
           </thead>
           <tbody>
             {quotations.length === 0 ? (
               <tr>
-                <td colSpan={16}>
+                <td colSpan={11}>
                   <div className="empty-state text-center py-[60px] px-5 text-[var(--text-muted)]">
                     <div className="empty-state-icon text-[48px] mb-4">{'\uD83D\uDD0D'}</div>
                     <div className="empty-state-text text-[15px] font-medium">No quotations found</div>
@@ -135,85 +111,37 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
                 </td>
               </tr>
             ) : (
-              quotations.map((q) => {
-                const isExpanded = expandedRows.has(q.id);
-                return (
-                  <Fragment key={q.id}>
-                    <tr
-                      className={`quote-row cursor-pointer ${isExpanded ? 'quote-row-expanded' : ''}`}
-                      onClick={() => toggleRow(q.id)}
+              quotations.map((q) => (
+                <tr
+                  key={q.id}
+                  className="quote-row cursor-pointer hover:bg-[rgba(129,140,248,0.04)]"
+                  onClick={() => setDetailQuotation(q)}
+                >
+                  <td className="px-2.5 py-2.5 border-b border-[var(--border-light)]">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--text-muted)]"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                  </td>
+                  <td className="px-2.5 py-2.5 border-b border-[var(--border-light)]"><span className={`entity-badge inline-flex items-center px-2.5 py-[3px] rounded-full text-[11px] font-bold tracking-[0.04em] uppercase entity-${q.entity.toLowerCase()}`}>{q.entity}</span></td>
+                  <td className="px-2.5 py-2.5 border-b border-[var(--border-light)] font-semibold text-[13px] max-w-[140px] overflow-hidden text-ellipsis">{q.supplierName}</td>
+                  <td className="px-2.5 py-2.5 border-b border-[var(--border-light)] font-['SF_Mono',Consolas,monospace] text-xs">{q.supplierPO}</td>
+                  <td className="px-2.5 py-2.5 border-b border-[var(--border-light)] text-right font-variant-[tabular-nums] font-semibold text-[13px]">{fmt(q.poValue)}</td>
+                  <td className="px-2.5 py-2.5 border-b border-[var(--border-light)] text-[13px]">{q.origin}</td>
+                  <td className="px-2.5 py-2.5 border-b border-[var(--border-light)] text-[13px]">{q.destination}</td>
+                  <td className="px-2.5 py-2.5 border-b border-[var(--border-light)]"><span className="mode-tag inline-flex items-center px-[7px] py-[2px] rounded text-[12px]">{getModeIcon(q.mode)} {q.mode}</span></td>
+                  <td className="px-2.5 py-2.5 border-b border-[var(--border-light)]" onClick={e => e.stopPropagation()}>
+                    <select
+                      className={`status-select text-[12px] px-2 py-1 rounded border cursor-pointer ${getStatusClass(q.status)}`}
+                      value={q.status}
+                      onChange={e => onStatusChange(q.id, e.target.value)}
                     >
-                      <td className="td-expand text-center px-1.5">
-                        <span className={`expand-icon inline-block text-[10px] text-[var(--text-muted)] transition-transform duration-200 ${isExpanded ? 'expanded' : ''}`}>{'\u25B6'}</span>
-                      </td>
-                      <td><span className={`entity-badge inline-flex items-center px-2.5 py-[3px] rounded-full text-[11px] font-bold tracking-[0.04em] uppercase entity-${q.entity.toLowerCase()}`}>{q.entity}</span></td>
-                      <td className="td-supplier font-semibold max-w-[140px] overflow-hidden text-ellipsis text-[13px]">{q.supplierName}</td>
-                      <td className="td-mono font-['SF_Mono',Consolas,monospace] text-xs">{q.supplierPO}</td>
-                      <td className="num td-value text-right font-variant-[tabular-nums] font-semibold text-[var(--text)] text-[13px]">{fmt(q.poValue)}</td>
-                      <td>{q.origin}</td>
-                      <td>{q.destination}</td>
-                      <td><span className="mode-tag inline-flex items-center px-[7px] py-[2px] rounded text-[12px]">{getModeIcon(q.mode)} {q.mode}</span></td>
-                      <td className="td-size text-xs text-[var(--text-secondary)]">{q.size}</td>
-                      <td className="td-transit text-xs text-[var(--text-secondary)]">{q.transitTime || '-'}</td>
-                      <td className="td-date text-[var(--text-secondary)] whitespace-nowrap text-[13px]">{q.etd || '-'}</td>
-                      <td className="td-date text-[var(--text-secondary)] whitespace-nowrap text-[13px]">{q.eta || '-'}</td>
-                      <td><span className="inco-tag inline-flex items-center px-[7px] py-[2px] rounded text-[12px]">{q.incoterms}</span></td>
-                      <td onClick={e => e.stopPropagation()}>
-                        <select
-                          className={`status-select text-[12px] px-2 py-1 rounded border cursor-pointer ${getStatusClass(q.status)}`}
-                          value={q.status}
-                          onChange={e => onStatusChange(q.id, e.target.value)}
-                        >
-                          {STATUS_LIST.map(s => (
-                            <option key={s} value={s}>{s}</option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="num text-right font-variant-[tabular-nums] font-medium">{Number.isFinite(q.percentage) ? q.percentage : 0}%</td>
-                      <td className="num td-savings text-right font-variant-[tabular-nums] font-semibold text-[var(--text-secondary)]">{q.savings > 0 ? fmt(q.savings) : '-'}</td>
-                    </tr>
-                    {isExpanded && (
-                      <tr key={`${q.id}-quotes`} className="quotes-expand-row">
-                        <td colSpan={16} className="p-0">
-                          <div className="quotes-expand-panel bg-gradient-to-br from-[rgba(129,140,248,0.04)] to-[rgba(34,211,238,0.04)] border-t border-b border-[var(--border)] p-3 px-4 animate-[expandSlideIn_0.25s_ease]">
-                            <div className="quotes-expand-top flex items-center justify-between mb-2.5">
-                              <div className="quotes-expand-title text-[13px] font-bold text-[var(--text-primary)] tracking-tight">{'\uD83D\uDCB3'} Forwarder Quotes {q.savings > 0 && <span className="savings-badge inline-flex items-center px-2 py-[2px] rounded-[10px] text-[11px] font-semibold bg-[rgba(16,185,129,0.1)] text-[var(--text-secondary)] ml-2">Savings: AED {fmt(q.savings)}</span>}</div>
-                              <div className="quotes-expand-actions flex gap-1.5">
-                                <button className="btn btn-sm btn-edit flex items-center gap-1 px-3 py-1 rounded text-xs font-semibold cursor-pointer transition-all" onClick={() => onEdit(q)}>
-                                  {'\u270F\uFE0F'} Edit
-                                </button>
-                                <button className="btn btn-sm btn-delete flex items-center gap-1 px-3 py-1 rounded text-xs font-semibold cursor-pointer transition-all" onClick={() => onDelete(q.id)}>
-                                  {'\uD83D\uDDD1\uFE0F'} Delete
-                                </button>
-                              </div>
-                            </div>
-                            <div className="quotes-expand-grid flex flex-wrap gap-1.5">
-                              {q.quotes.filter(qt => qt.quotedAmount > 0).map(qt => {
-                                const f = qt.forwarder;
-                                const amount = qt.quotedAmount;
-                                return (
-                                  <div key={f} className={`quotes-expand-card inline-flex items-center gap-3 bg-[var(--card-bg)] rounded-md px-3 py-1.5 border border-[var(--border-light)] transition-all ${getAwardClass(f, q.awardedTo)}`}>
-                                    <div className="quotes-expand-card-name text-xs font-semibold text-[var(--text-primary)] tracking-tight">{f}</div>
-                                    <div className="quotes-expand-card-amount text-[13px] font-bold text-[var(--text-primary)] tracking-tight">AED {fmt(amount)}</div>
-                                    <button
-                                      className="btn-award-expand inline-flex items-center gap-[3px] px-2.5 py-[3px] rounded-[12px] text-[11px] font-semibold cursor-pointer border border-[var(--border-light)] bg-[var(--card-bg)] text-[var(--text-secondary)] transition-all ml-1 hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)]"
-                                      title={`Award to ${f}`}
-                                      onClick={() => onAward(q.id, f)}
-                                    >
-                                      {q.awardedTo === f ? '\u2605 Awarded' : '\u2606 Award'}
-                                    </button>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                            {q.remarks && <div className="quotes-expand-remarks mt-2.5 p-3 rounded-md bg-[var(--bg)] text-xs text-[var(--text-secondary)] border border-[var(--border-light)]">{'\uD83D\uDCCB'} {q.remarks}</div>}
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </Fragment>
-                );
-              })
+                      {STATUS_LIST.map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="px-2.5 py-2.5 border-b border-[var(--border-light)] text-right font-variant-[tabular-nums] font-medium">{Number.isFinite(q.percentage) ? q.percentage : 0}%</td>
+                  <td className="px-2.5 py-2.5 border-b border-[var(--border-light)] text-right font-variant-[tabular-nums] font-semibold text-[var(--success)]">{q.savings > 0 ? fmt(q.savings) : '-'}</td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>
@@ -228,12 +156,13 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
           </div>
         ) : (
           quotations.map((q) => (
-            <div key={q.id} className="quotation-card bg-[var(--card-bg)] rounded-xl border border-[var(--border-light)] shadow-[var(--card-shadow)] p-4">
+            <div key={q.id} className="quotation-card bg-[var(--card-bg)] rounded-xl border border-[var(--border-light)] shadow-[var(--card-shadow)] p-4 cursor-pointer" onClick={() => setDetailQuotation(q)}>
               <div className="card-header flex items-center justify-between mb-2">
                 <span className={`entity-badge inline-flex items-center px-2.5 py-[3px] rounded-full text-[11px] font-bold tracking-[0.04em] uppercase entity-${q.entity.toLowerCase()}`}>{q.entity}</span>
                 <select
                   className={`status-select status-select-sm text-[12px] px-2 py-1 rounded border cursor-pointer ${getStatusClass(q.status)}`}
                   value={q.status}
+                  onClick={e => e.stopPropagation()}
                   onChange={e => onStatusChange(q.id, e.target.value)}
                 >
                   {STATUS_LIST.map(s => (
@@ -254,54 +183,147 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
                 <span className="inco-tag inline-flex items-center px-[7px] py-[2px] rounded text-[12px]">{q.incoterms}</span>
                 {q.transitTime && <span className="transit-tag inline-flex items-center px-2 py-[2px] rounded text-[12px] bg-[var(--info-bg)] text-[var(--info)]">{'\u23F1\uFE0F'} {q.transitTime}</span>}
               </div>
-              {(q.etd || q.eta) && (
-                <div className="card-dates flex flex-wrap gap-2 mt-1.5">
-                  {q.etd && <span className="date-tag text-xs px-2.5 py-[3px] rounded-md bg-[var(--primary-bg)] text-[var(--primary)] font-medium">{'\u2693\uFE0F'} ETD: {q.etd}</span>}
-                  {q.eta && <span className="date-tag text-xs px-2.5 py-[3px] rounded-md bg-[var(--primary-bg)] text-[var(--primary)] font-medium">{'\uD83D\uDCCD'} ETA: {q.eta}</span>}
-                </div>
-              )}
-              {q.size && <div className="card-size text-sm text-[var(--text-secondary)] mt-2">{'\uD83D\uDCE6'} {q.size}</div>}
               {q.savings > 0 && <div className="card-savings text-sm font-semibold text-[var(--success)] mt-2">{'\uD83D\uDCB0'} Savings: AED {fmt(q.savings)}</div>}
-              <button
-                className={`card-quotes-toggle w-full flex items-center justify-between py-2 mt-3 text-sm font-semibold text-[var(--primary)] border-t border-[var(--border-light)] cursor-pointer transition-all ${mobileExpandedCards.has(q.id) ? 'expanded' : ''}`}
-                onClick={() => toggleMobileCard(q.id)}
-              >
-                {'\uD83D\uDCB3'} Forwarder Quotes ({q.quotes.filter(qt => qt.quotedAmount > 0).length})
-                <span className={`expand-icon inline-block text-[10px] text-[var(--text-muted)] transition-transform duration-200 ${mobileExpandedCards.has(q.id) ? 'expanded' : ''}`}>{'\u25B6'}</span>
-              </button>
-              {mobileExpandedCards.has(q.id) && (
-                <div className="card-quotes flex flex-col gap-1.5 mt-2">
-                  {q.quotes.filter(qt => qt.quotedAmount > 0).map(qt => {
-                    return (
-                      <div key={qt.forwarder} className={`card-quote flex items-center justify-between px-3 py-2 rounded-lg border border-[var(--border-light)] bg-[var(--card-bg)] transition-all ${getAwardClass(qt.forwarder, q.awardedTo)}`}>
-                        <span className="card-quote-name text-sm font-semibold text-[var(--text-primary)]">{qt.forwarder}</span>
-                        <span className="card-quote-value text-sm font-bold text-[var(--text-primary)]">{fmt(qt.quotedAmount)}</span>
-                        <button
-                          className="btn-award w-8 h-8 flex items-center justify-center rounded-full border border-[var(--border-light)] bg-[var(--card-bg)] text-[var(--text-secondary)] cursor-pointer transition-all hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)]"
-                          title={`Award to ${qt.forwarder}`}
-                          onClick={() => onAward(q.id, qt.forwarder)}
-                        >
-                          {q.awardedTo === qt.forwarder ? '\u2605' : '\u2606'}
-                        </button>
-                      </div>
-                    );
-                  })}
-                  {q.quotes.filter(qt => qt.quotedAmount > 0).length === 0 && (
-                    <div className="card-quote-empty text-center py-4 text-sm text-[var(--text-muted)]">No quotes yet</div>
-                  )}
-                </div>
-              )}
               <div className="card-footer flex items-center justify-between mt-3 pt-3 border-t border-[var(--border-light)]">
                 <span className="card-pct text-sm font-semibold text-[var(--text-secondary)]">{Number.isFinite(q.percentage) ? q.percentage : 0}%</span>
                 <div className="card-actions flex items-center gap-2">
-                  <button className="btn btn-sm btn-edit flex items-center gap-1 px-3 py-1 rounded text-xs font-semibold cursor-pointer transition-all" onClick={() => onEdit(q)}>{'\u270F\uFE0F'} Edit</button>
-                  <button className="btn btn-sm btn-delete flex items-center gap-1 px-3 py-1 rounded text-xs font-semibold cursor-pointer transition-all" onClick={() => onDelete(q.id)}>{'\uD83D\uDDD1\uFE0F'} Delete</button>
+                  <button className="btn btn-sm btn-edit flex items-center gap-1 px-3 py-1 rounded text-xs font-semibold cursor-pointer transition-all" onClick={(e) => { e.stopPropagation(); onEdit(q); }}>{'\u270F\uFE0F'} Edit</button>
+                  <button className="btn btn-sm btn-delete flex items-center gap-1 px-3 py-1 rounded text-xs font-semibold cursor-pointer transition-all" onClick={(e) => { e.stopPropagation(); onDelete(q.id); }}>{'\uD83D\uDDD1\uFE0F'} Delete</button>
                 </div>
               </div>
             </div>
           ))
         )}
       </div>
+
+      {/* Detail Modal */}
+      {detailQuotation && (
+        <div className="modal-overlay" onClick={() => setDetailQuotation(null)}>
+          <div className="modal modal-lg" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true">
+            <div className="modal-header">
+              <div className="modal-title">
+                <span className={`entity-badge inline-flex items-center px-2.5 py-[3px] rounded-full text-[11px] font-bold tracking-[0.04em] uppercase entity-${detailQuotation.entity.toLowerCase()}`}>{detailQuotation.entity}</span>
+                <h2 className="m-0 text-lg font-semibold">{detailQuotation.supplierName}</h2>
+                <span className="font-['SF_Mono',Consolas,monospace] text-sm text-[var(--text-secondary)]">{detailQuotation.supplierPO}</span>
+              </div>
+              <button className="btn-close" onClick={() => setDetailQuotation(null)} aria-label="Close">{'\u2715'}</button>
+            </div>
+
+            <div className="p-5">
+              {/* Summary Row */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1">PO Value</div>
+                  <div className="text-base font-bold text-[var(--text)]">AED {fmt(detailQuotation.poValue)}</div>
+                </div>
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1">Freight %</div>
+                  <div className="text-base font-bold text-[var(--primary)]">{Number.isFinite(detailQuotation.percentage) ? detailQuotation.percentage : 0}%</div>
+                </div>
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1">Savings</div>
+                  <div className="text-base font-bold text-[var(--success)]">{detailQuotation.savings > 0 ? `AED ${fmt(detailQuotation.savings)}` : '-'}</div>
+                </div>
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1">Status</div>
+                  <select
+                    className={`status-select text-[12px] px-2 py-1 rounded border cursor-pointer ${getStatusClass(detailQuotation.status)}`}
+                    value={detailQuotation.status}
+                    onChange={e => onStatusChange(detailQuotation.id, e.target.value)}
+                  >
+                    {STATUS_LIST.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Route Info */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5 p-3 bg-[var(--bg)] rounded-lg border border-[var(--border-light)]">
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1">Origin</div>
+                  <div className="text-sm font-medium text-[var(--text)]">{detailQuotation.origin || '-'}</div>
+                </div>
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1">Destination</div>
+                  <div className="text-sm font-medium text-[var(--text)]">{detailQuotation.destination || '-'}</div>
+                </div>
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1">Mode</div>
+                  <div className="text-sm font-medium text-[var(--text)]">{getModeIcon(detailQuotation.mode)} {detailQuotation.mode || '-'}</div>
+                </div>
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1">Size</div>
+                  <div className="text-sm font-medium text-[var(--text)]">{detailQuotation.size || '-'}</div>
+                </div>
+                {detailQuotation.transitTime && (
+                  <div>
+                    <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1">Transit</div>
+                    <div className="text-sm font-medium text-[var(--text)]">{detailQuotation.transitTime}</div>
+                  </div>
+                )}
+                <div>
+                  <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1">Incoterms</div>
+                  <div className="text-sm font-medium text-[var(--text)]">{detailQuotation.incoterms || '-'}</div>
+                </div>
+                {detailQuotation.etd && (
+                  <div>
+                    <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1">ETD</div>
+                    <div className="text-sm font-medium text-[var(--text)]">{detailQuotation.etd}</div>
+                  </div>
+                )}
+                {detailQuotation.eta && (
+                  <div>
+                    <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1">ETA</div>
+                    <div className="text-sm font-medium text-[var(--text)]">{detailQuotation.eta}</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Forwarder Quotes */}
+              <div className="mb-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold text-[var(--text)] m-0">Forwarder Quotes</h3>
+                  {detailQuotation.savings > 0 && (
+                    <span className="savings-badge inline-flex items-center px-2.5 py-1 rounded-[10px] text-[11px] font-semibold bg-[rgba(16,185,129,0.1)] text-[var(--success)]">Savings: AED {fmt(detailQuotation.savings)}</span>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  {detailQuotation.quotes.filter(qt => qt.quotedAmount > 0).map(qt => (
+                    <div key={qt.forwarder} className={`flex items-center justify-between px-4 py-2.5 rounded-lg border transition-all ${getAwardClass(qt.forwarder, detailQuotation.awardedTo) === 'awarded' ? 'border-[var(--success)] bg-[var(--success-bg)]' : getAwardClass(qt.forwarder, detailQuotation.awardedTo) === 'not-awarded' ? 'border-[var(--border-light)] bg-[#1f2937]' : 'border-[var(--border-light)] bg-[var(--card-bg)]'}`}>
+                      <span className="text-sm font-semibold text-[var(--text-primary)]">{qt.forwarder}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-bold text-[var(--text-primary)]">AED {fmt(qt.quotedAmount)}</span>
+                        <button
+                          className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-semibold cursor-pointer border border-[var(--border-light)] bg-[var(--card-bg)] text-[var(--text-secondary)] transition-all hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)]"
+                          onClick={() => onAward(detailQuotation.id, qt.forwarder)}
+                        >
+                          {detailQuotation.awardedTo === qt.forwarder ? '\u2605 Awarded' : '\u2606 Award'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {detailQuotation.quotes.filter(qt => qt.quotedAmount > 0).length === 0 && (
+                    <div className="text-center py-6 text-sm text-[var(--text-muted)]">No quotes yet</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Remarks */}
+              {detailQuotation.remarks && (
+                <div className="p-3 rounded-lg bg-[var(--bg)] text-sm text-[var(--text-secondary)] border border-[var(--border-light)] mb-5">{'\uD83D\uDCCB'} {detailQuotation.remarks}</div>
+              )}
+
+              {/* Actions */}
+              <div className="flex justify-end gap-2 pt-3 border-t border-[var(--border-light)]">
+                <button className="btn btn-secondary" onClick={() => setDetailQuotation(null)}>Close</button>
+                <button className="btn btn-sm btn-edit flex items-center gap-1 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition-all" onClick={() => { setDetailQuotation(null); onEdit(detailQuotation); }}>{'\u270F\uFE0F'} Edit</button>
+                <button className="btn btn-sm btn-delete flex items-center gap-1 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition-all" onClick={() => { setDetailQuotation(null); onDelete(detailQuotation.id); }}>{'\uD83D\uDDD1\uFE0F'} Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

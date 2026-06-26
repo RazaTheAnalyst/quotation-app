@@ -190,13 +190,13 @@ function AppContent() {
             Forwarders
           </NavLink>
           <button className="btn btn-nav btn-nav-add bg-[var(--add-btn-bg)] text-[var(--add-btn-text)] font-semibold ml-1.5 rounded-lg px-3.5 py-1.5 text-xs cursor-pointer border-none transition-all duration-200 tracking-tight whitespace-nowrap inline-flex items-center gap-[5px] min-h-[32px] hover:bg-[var(--add-btn-hover-bg)]" onClick={handleAdd}>
-            {'+ '}Add Quotation
+            Add Quotation
           </button>
           <div className="user-menu flex items-center gap-2 ml-1 pl-2 border-l border-[var(--header-actions-border)]">
             <span className="user-email text-xs text-[var(--btn-text)] whitespace-nowrap hidden sm:inline">{user?.email}</span>
             <ThemeToggle />
             <button className="btn btn-signout bg-[var(--signout-bg)] text-[var(--signout-text)] rounded-lg px-2.5 py-1.5 text-xs cursor-pointer border-none transition-all duration-200 hover:bg-[var(--signout-hover-bg)] hover:text-[var(--signout-hover-text)]" onClick={signOut} title="Sign out">
-              {'\uD83D\uDEAA'}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             </button>
           </div>
         </nav>

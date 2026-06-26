@@ -112,7 +112,7 @@ describe('QuotationTable', () => {
     expect(screen.getAllByText('No quotations found').length).toBe(2);
   });
 
-  it('calls onEdit when edit button is clicked', async () => {
+  it('calls onEdit when edit button is clicked in modal', async () => {
     const user = userEvent.setup();
     render(
       <QuotationTable
@@ -126,13 +126,13 @@ describe('QuotationTable', () => {
     );
     const row = document.querySelector('.quote-row')!;
     await user.click(row);
-    const expandPanel = row.nextElementSibling as HTMLElement;
-    const editButton = within(expandPanel).getByRole('button', { name: /edit/i });
+    const modal = document.querySelector('.modal-overlay')!;
+    const editButton = within(modal as HTMLElement).getByRole('button', { name: /edit/i });
     await user.click(editButton);
     expect(mockOnEdit).toHaveBeenCalledWith(mockQuotations[0]);
   });
 
-  it('calls onDelete when delete button is clicked', async () => {
+  it('calls onDelete when delete button is clicked in modal', async () => {
     const user = userEvent.setup();
     render(
       <QuotationTable
@@ -146,13 +146,13 @@ describe('QuotationTable', () => {
     );
     const row = document.querySelector('.quote-row')!;
     await user.click(row);
-    const expandPanel = row.nextElementSibling as HTMLElement;
-    const deleteButton = within(expandPanel).getByRole('button', { name: /delete/i });
+    const modal = document.querySelector('.modal-overlay')!;
+    const deleteButton = within(modal as HTMLElement).getByRole('button', { name: /delete/i });
     await user.click(deleteButton);
     expect(mockOnDelete).toHaveBeenCalledWith(1);
   });
 
-  it('shows awarded badge for awarded quotations', async () => {
+  it('shows forwarder quotes in modal', async () => {
     const user = userEvent.setup();
     render(
       <QuotationTable
@@ -164,8 +164,8 @@ describe('QuotationTable', () => {
         onStatusChange={mockOnStatusChange}
       />
     );
-    const toggleBtn = screen.getByText(/Forwarder Quotes/);
-    await user.click(toggleBtn);
+    const row = document.querySelector('.quote-row')!;
+    await user.click(row);
     expect(screen.getAllByText('BDP').length).toBeGreaterThanOrEqual(1);
   });
 
