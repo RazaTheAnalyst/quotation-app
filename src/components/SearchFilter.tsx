@@ -1,3 +1,4 @@
+import { useRef, useCallback } from 'react';
 import { ENTITIES, STATUS_LIST } from '../types';
 import type { Filters } from '../types';
 
@@ -9,9 +10,12 @@ interface SearchFilterProps {
 }
 
 export default function SearchFilter({ filters, onFilterChange, resultCount, totalCount }: SearchFilterProps) {
-  const handleChange = (key: keyof Filters, value: string) => {
-    onFilterChange({ ...filters, [key]: value });
-  };
+  const filtersRef = useRef(filters);
+  filtersRef.current = filters;
+
+  const handleChange = useCallback((key: keyof Filters, value: string) => {
+    onFilterChange({ ...filtersRef.current, [key]: value });
+  }, [onFilterChange]);
 
   const hasActiveFilters = filters.search || filters.entity || filters.status;
 
