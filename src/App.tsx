@@ -174,35 +174,35 @@ function AppContent() {
           Error loading data: {storeError}
         </div>
       )}
-      <header className="app-header sticky top-0 z-10 flex items-center justify-between bg-[var(--header-bg)] px-5 border-b border-[var(--header-border)] h-[50px] h-[calc(50px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)]">
-        <h1 className="text-sm font-semibold text-[var(--text)] tracking-tight flex items-center gap-2 whitespace-nowrap">
+      <header className="app-header sticky top-0 z-10 flex items-center justify-between bg-[var(--header-bg)] px-3 sm:px-5 border-b border-[var(--header-border)] h-[50px] h-[calc(50px+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)]">
+        <h1 className="text-sm font-semibold text-[var(--text)] tracking-tight flex items-center gap-2 whitespace-nowrap flex-shrink-0">
           <img src="/logo.svg" alt="Logo" className="header-logo w-8 h-8 flex-shrink-0 drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]" />
-          Quotation Manager
+          <span className="hidden sm:inline">Quotation Manager</span>
         </h1>
-        <nav className="header-actions flex items-center gap-0 flex-shrink-0 bg-[var(--header-actions-bg)] rounded-[10px] p-[3px] border border-[var(--header-actions-border)]">
-          <NavLink to="/" end className={({ isActive }) => `btn btn-nav ${isActive ? 'active' : ''} px-3.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer border-none text-[var(--btn-text)] transition-all duration-200 tracking-tight whitespace-nowrap inline-flex items-center gap-[5px] bg-transparent min-h-[32px] hover:text-[var(--btn-hover-text)] hover:bg-[var(--btn-hover-bg)]`}>
+        <nav className="header-actions flex items-center gap-0 flex-shrink min-w-0 overflow-x-auto scrollbar-none bg-[var(--header-actions-bg)] rounded-[10px] p-[3px] border border-[var(--header-actions-border)]">
+          <NavLink to="/" end className={({ isActive }) => `btn btn-nav ${isActive ? 'active' : ''} px-2.5 sm:px-3.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium cursor-pointer border-none text-[var(--btn-text)] transition-all duration-200 tracking-tight whitespace-nowrap inline-flex items-center gap-[5px] bg-transparent min-h-[32px] hover:text-[var(--btn-hover-text)] hover:bg-[var(--btn-hover-bg)]`}>
             Dashboard
           </NavLink>
-          <NavLink to="/quotations" className={({ isActive }) => `btn btn-nav ${isActive ? 'active' : ''} px-3.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer border-none text-[var(--btn-text)] transition-all duration-200 tracking-tight whitespace-nowrap inline-flex items-center gap-[5px] bg-transparent min-h-[32px] hover:text-[var(--btn-hover-text)] hover:bg-[var(--btn-hover-bg)]`}>
+          <NavLink to="/quotations" className={({ isActive }) => `btn btn-nav ${isActive ? 'active' : ''} px-2.5 sm:px-3.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium cursor-pointer border-none text-[var(--btn-text)] transition-all duration-200 tracking-tight whitespace-nowrap inline-flex items-center gap-[5px] bg-transparent min-h-[32px] hover:text-[var(--btn-hover-text)] hover:bg-[var(--btn-hover-bg)]`}>
             Quotations
           </NavLink>
-          <NavLink to="/forwarders" className={({ isActive }) => `btn btn-nav ${isActive ? 'active' : ''} px-3.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer border-none text-[var(--btn-text)] transition-all duration-200 tracking-tight whitespace-nowrap inline-flex items-center gap-[5px] bg-transparent min-h-[32px] hover:text-[var(--btn-hover-text)] hover:bg-[var(--btn-hover-bg)]`}>
+          <NavLink to="/forwarders" className={({ isActive }) => `btn btn-nav ${isActive ? 'active' : ''} px-2.5 sm:px-3.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium cursor-pointer border-none text-[var(--btn-text)] transition-all duration-200 tracking-tight whitespace-nowrap inline-flex items-center gap-[5px] bg-transparent min-h-[32px] hover:text-[var(--btn-hover-text)] hover:bg-[var(--btn-hover-bg)]`}>
             Forwarders
           </NavLink>
-          <button className="btn btn-nav btn-nav-add bg-[var(--add-btn-bg)] text-[var(--add-btn-text)] font-semibold ml-1.5 rounded-lg px-3.5 py-1.5 text-xs cursor-pointer border-none transition-all duration-200 tracking-tight whitespace-nowrap inline-flex items-center gap-[5px] min-h-[32px] hover:bg-[var(--add-btn-hover-bg)]" onClick={handleAdd}>
-            Add Quotation
+          <button className="btn btn-nav btn-nav-add bg-[var(--add-btn-bg)] text-[var(--add-btn-text)] font-semibold ml-1 sm:ml-1.5 rounded-lg px-2.5 sm:px-3.5 py-1.5 text-[11px] sm:text-xs cursor-pointer border-none transition-all duration-200 tracking-tight whitespace-nowrap inline-flex items-center gap-[5px] min-h-[32px] hover:bg-[var(--add-btn-hover-bg)]" onClick={handleAdd}>
+            + Add
           </button>
-          <div className="user-menu flex items-center gap-2 ml-1 pl-2 border-l border-[var(--header-actions-border)]">
-            <span className="user-email text-xs text-[var(--btn-text)] whitespace-nowrap hidden sm:inline">{user?.email}</span>
+          <div className="user-menu flex items-center gap-1 sm:gap-2 ml-1 pl-1.5 sm:pl-2 border-l border-[var(--header-actions-border)] flex-shrink-0">
+            <span className="user-email text-xs text-[var(--btn-text)] whitespace-nowrap hidden md:inline">{user?.email}</span>
             <ThemeToggle />
-            <button className="btn btn-signout bg-[var(--signout-bg)] text-[var(--signout-text)] rounded-lg px-2.5 py-1.5 text-xs cursor-pointer border-none transition-all duration-200 hover:bg-[var(--signout-hover-bg)] hover:text-[var(--signout-hover-text)]" onClick={signOut} title="Sign out">
+            <button className="btn btn-signout bg-[var(--signout-bg)] text-[var(--signout-text)] rounded-lg px-2 py-1.5 text-xs cursor-pointer border-none transition-all duration-200 hover:bg-[var(--signout-hover-bg)] hover:text-[var(--signout-hover-text)]" onClick={signOut} title="Sign out">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             </button>
           </div>
         </nav>
       </header>
 
-      <main className="app-main flex-1 py-7 px-8 max-w-full">
+      <main className="app-main flex-1 py-4 sm:py-7 px-4 sm:px-8 max-w-full">
         <Routes>
           <Route path="/" element={<Dashboard quotations={quotations} forwarders={forwarders} />} />
           <Route
