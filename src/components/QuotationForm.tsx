@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ENTITIES, STATUS_LIST } from '../types';
+import { ENTITIES, STATUS_LIST, CURRENCY_LIST, convertCurrency } from '../types';
 import type { Quotation, Forwarder } from '../types';
 import { COUNTRIES, INCOTERMS_LIST, MODES_LIST } from '../locations';
 
@@ -11,6 +11,7 @@ const quotationSchema = z.object({
   supplierName: z.string().min(1, 'Supplier name is required'),
   supplierPO: z.string().min(1, 'PO number is required'),
   poValue: z.coerce.number().positive('PO value must be greater than 0'),
+  poValueCurrency: z.string().optional().default('AED'),
   origin: z.string().min(1, 'Origin is required'),
   destination: z.string().min(1, 'Destination is required'),
   mode: z.string().min(1, 'Mode is required'),
@@ -20,6 +21,7 @@ const quotationSchema = z.object({
   quotes: z.array(z.object({
     forwarder: z.string(),
     quotedAmount: z.coerce.number().min(0, 'Amount must be 0 or more'),
+    currency: z.string().optional().default('AED'),
   })),
   awardedTo: z.string().optional().default(''),
   remarks: z.string().max(500, 'Remarks must be 500 characters or less').optional().default(''),
@@ -46,13 +48,18 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
       supplierName: quotation?.supplierName ?? '',
       supplierPO: quotation?.supplierPO ?? '',
       poValue: quotation?.poValue ?? 0,
+      poValueCurrency: quotation?.poValueCurrency ?? 'AED',
       origin: quotation?.origin ?? '',
       destination: quotation?.destination ?? '',
       mode: quotation?.mode ?? '',
       size: quotation?.size ?? '',
       transitTime: quotation?.transitTime ?? '',
       incoterms: quotation?.incoterms ?? '',
-      quotes: quotation?.quotes ?? forwarders.map(f => ({ forwarder: f.name, quotedAmount: 0 })),
+      quotes: quotation?.quotes?.map(q => ({
+        forwarder: q.forwarder,
+        quotedAmount: q.quotedAmount,
+        currency: q.currency ?? 'AED',
+      })) ?? [{ forwarder: '', quotedAmount: 0, currency: 'AED' }],
       awardedTo: quotation?.awardedTo ?? '',
       remarks: quotation?.remarks ?? '',
       etd: quotation?.etd ?? '',
@@ -65,8 +72,9 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
   const { fields, append, remove } = useFieldArray({ control, name: 'quotes' });
 
   const poValue = watch('poValue');
+  const poValueCurrency = watch('poValueCurrency') || 'AED';
   const awardedTo = watch('awardedTo');
-  const quotes = watch('quotes');
+  const quotes = watch('quotes') || [];
   const originValue = watch('origin');
   const destinationValue = watch('destination');
 
@@ -75,13 +83,28 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
   const [showOriginDropdown, setShowOriginDropdown] = useState(false);
   const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
 
-  const validQuotes = quotes.filter(q => q.quotedAmount > 0);
-  const lowestAmount = validQuotes.length > 0 ? Math.min(...validQuotes.map(q => q.quotedAmount)) : 0;
-  const highestAmount = validQuotes.length > 0 ? Math.max(...validQuotes.map(q => q.quotedAmount)) : 0;
-  const percentage = poValue > 0 ? ((lowestAmount / poValue) * 100).toFixed(2) : '0.00';
+  const validQuotesConverted = useMemo(() => {
+    return (quotes || []).filter(q => q.quotedAmount > 0).map(q => {
+      const amtInPoCurrency = convertCurrency(q.quotedAmount, q.currency || 'AED', poValueCurrency);
+      return {
+        ...q,
+        amountInPoCurrency: amtInPoCurrency,
+      };
+    });
+  }, [quotes, poValueCurrency]);
 
-  const autoSavings = validQuotes.length >= 2
-    ? Math.round((highestAmount - lowestAmount) * 100) / 100
+  const lowestAmountInPoCurrency = validQuotesConverted.length > 0
+    ? Math.min(...validQuotesConverted.map(q => q.amountInPoCurrency))
+    : 0;
+
+  const highestAmountInPoCurrency = validQuotesConverted.length > 0
+    ? Math.max(...validQuotesConverted.map(q => q.amountInPoCurrency))
+    : 0;
+
+  const percentage = poValue > 0 ? ((lowestAmountInPoCurrency / poValue) * 100).toFixed(2) : '0.00';
+
+  const autoSavings = validQuotesConverted.length >= 2
+    ? Math.round((highestAmountInPoCurrency - lowestAmountInPoCurrency) * 100) / 100
     : null;
 
   const filteredOrigins = useMemo(() => {
@@ -126,18 +149,23 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
 
   const handleFormSubmit = (data: QuotationFormData) => {
     const validQ = data.quotes.filter(q => q.quotedAmount > 0);
-    const lowestAmt = validQ.length > 0 ? Math.min(...validQ.map(q => q.quotedAmount)) : 0;
-    const percentageVal = data.poValue > 0 ? (lowestAmt / data.poValue) * 100 : 0;
+    const validQConverted = validQ.map(q => ({
+      ...q,
+      amountInPoCurrency: convertCurrency(q.quotedAmount, q.currency || 'AED', data.poValueCurrency || 'AED'),
+    }));
+    const lowestAmtInPoCurrency = validQConverted.length > 0 ? Math.min(...validQConverted.map(q => q.amountInPoCurrency)) : 0;
+    const highestAmtInPoCurrency = validQConverted.length > 0 ? Math.max(...validQConverted.map(q => q.amountInPoCurrency)) : 0;
+    const percentageVal = data.poValue > 0 ? (lowestAmtInPoCurrency / data.poValue) * 100 : 0;
     let savingsVal = data.savings ?? 0;
-    if (validQ.length >= 2) {
-      savingsVal = Math.round((Math.max(...validQ.map(q => q.quotedAmount)) - lowestAmt) * 100) / 100;
+    if (validQConverted.length >= 2) {
+      savingsVal = Math.round((highestAmtInPoCurrency - lowestAmtInPoCurrency) * 100) / 100;
     }
     onSave({ ...data, percentage: Math.round(percentageVal * 100) / 100, savings: savingsVal } as QuotationFormData & { percentage: number; savings: number });
   };
 
   const handleAddForwarder = () => {
     const lastForwarder = forwarders[forwarders.length - 1];
-    append({ forwarder: lastForwarder?.name ?? '', quotedAmount: 0 });
+    append({ forwarder: lastForwarder?.name ?? '', quotedAmount: 0, currency: 'AED' });
   };
 
   useEffect(() => {
@@ -212,21 +240,21 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
         </div>
 
         {/* Summary Bar */}
-        {(validQuotes.length > 0 || autoSavings !== null) && (
+        {(validQuotesConverted.length > 0 || autoSavings !== null) && (
           <div className="form-summary-bar">
-            {lowestAmount > 0 && (
+            {lowestAmountInPoCurrency > 0 && (
               <div className="summary-item">
                 <span className="summary-label">Lowest Quote</span>
-                <span className="summary-value summary-lowest">AED {new Intl.NumberFormat('en-US').format(lowestAmount)}</span>
+                <span className="summary-value summary-lowest">{poValueCurrency} {new Intl.NumberFormat('en-US').format(lowestAmountInPoCurrency)}</span>
               </div>
             )}
             {autoSavings !== null && (
               <div className="summary-item">
                 <span className="summary-label">Savings</span>
-                <span className="summary-value summary-savings">AED {new Intl.NumberFormat('en-US').format(autoSavings)}</span>
+                <span className="summary-value summary-savings">{poValueCurrency} {new Intl.NumberFormat('en-US').format(autoSavings)}</span>
               </div>
             )}
-            {lowestAmount > 0 && (
+            {lowestAmountInPoCurrency > 0 && (
               <div className="summary-item">
                 <span className="summary-label">Freight %</span>
                 <span className="summary-value summary-pct">{percentage}%</span>
@@ -239,33 +267,38 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
           {/* Section: Details */}
           <div className="form-section">
             <div className="form-section-header">
-              <span className="section-icon">{'\uD83D\uDCCB'}</span>
+              <span className="section-icon">📝</span>
               <span>Details</span>
             </div>
             <div className="form-grid form-grid-3">
               <div className="form-group">
-                <label className="mb-1 block text-sm font-medium" htmlFor="entity">{'\uD83C\uDF10'} Entity</label>
+                <label className="mb-1 block text-sm font-medium" htmlFor="entity">🏢 Entity</label>
                 <select className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="entity" {...register('entity')}>
                   {ENTITIES.map(e => <option key={e} value={e}>{e}</option>)}
                 </select>
               </div>
               <div className="form-group form-group-wide">
-                <label className="mb-1 block text-sm font-medium" htmlFor="supplierName">{'\uD83C\uDFED'} Supplier</label>
+                <label className="mb-1 block text-sm font-medium" htmlFor="supplierName">📦 Supplier</label>
                 <input className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="supplierName" type="text" placeholder="Supplier name" {...register('supplierName')} />
                 {errors.supplierName && <span className="error-text">{errors.supplierName.message}</span>}
               </div>
               <div className="form-group">
-                <label className="mb-1 block text-sm font-medium" htmlFor="supplierPO">{'\uD83D\uDCE0'} PO Number</label>
+                <label className="mb-1 block text-sm font-medium" htmlFor="supplierPO">📄 PO Number</label>
                 <input className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="supplierPO" type="text" placeholder="P227998" {...register('supplierPO')} />
                 {errors.supplierPO && <span className="error-text">{errors.supplierPO.message}</span>}
               </div>
               <div className="form-group">
-                <label className="mb-1 block text-sm font-medium" htmlFor="poValue">{'\uD83D\uDCB0'} PO Value (AED)</label>
-                <input className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="poValue" type="number" step="0.01" placeholder="0.00" {...register('poValue')} />
+                <label className="mb-1 block text-sm font-medium" htmlFor="poValue">💵 PO Value</label>
+                <div className="flex gap-2">
+                  <input className="flex-1 rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="poValue" type="number" step="0.01" placeholder="0.00" {...register('poValue')} />
+                  <select className="w-[100px] rounded border border-[var(--border)] bg-[var(--bg-main)] px-2.5 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)] cursor-pointer" {...register('poValueCurrency')}>
+                    {CURRENCY_LIST.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
                 {errors.poValue && <span className="error-text">{errors.poValue.message}</span>}
               </div>
               <div className="form-group">
-                <label className="mb-1 block text-sm font-medium" htmlFor="mode">{'\uD83D\uDEE2\uFE0F'} Mode</label>
+                <label className="mb-1 block text-sm font-medium" htmlFor="mode">🚢 Mode</label>
                 <select className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="mode" {...register('mode')}>
                   <option value="">Select</option>
                   {MODES_LIST.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
@@ -273,7 +306,7 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
                 {errors.mode && <span className="error-text">{errors.mode.message}</span>}
               </div>
               <div className="form-group">
-                <label className="mb-1 block text-sm font-medium" htmlFor="incoterms">{'\uD83C\uDF10'} Incoterms</label>
+                <label className="mb-1 block text-sm font-medium" htmlFor="incoterms">📜 Incoterms</label>
                 <select className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="incoterms" {...register('incoterms')}>
                   <option value="">Select</option>
                   {INCOTERMS_LIST.map(i => <option key={i.value} value={i.value}>{i.label}</option>)}
@@ -286,36 +319,36 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
           {/* Section: Route */}
           <div className="form-section">
             <div className="form-section-header">
-              <span className="section-icon">{'\uD83D\uDDFA\uFE0F'}</span>
+              <span className="section-icon">🛫</span>
               <span>Route</span>
             </div>
             <div className="form-grid form-grid-2">
               <div className="form-group">
-                <label className="mb-1 block text-sm font-medium">{'\uD83D\uDCCD'} Origin</label>
+                <label className="mb-1 block text-sm font-medium">🛫 Origin</label>
                 {renderLocationDropdown('origin', originSearch, setOriginSearch, showOriginDropdown, setShowOriginDropdown, filteredOrigins, selectedOriginCountry, handleOriginCitySelect)}
                 {errors.origin && <span className="error-text">{errors.origin.message}</span>}
               </div>
               <div className="form-group">
-                <label className="mb-1 block text-sm font-medium">{'\uD83C\uDFDF\uFE0F'} Destination</label>
+                <label className="mb-1 block text-sm font-medium">🛬 Destination</label>
                 {renderLocationDropdown('destination', destinationSearch, setDestinationSearch, showDestinationDropdown, setShowDestinationDropdown, filteredDestinations, selectedDestCountry, handleDestCitySelect)}
                 {errors.destination && <span className="error-text">{errors.destination.message}</span>}
               </div>
             </div>
             <div className="form-grid form-grid-4 mt-3">
               <div className="form-group">
-                <label className="mb-1 block text-sm font-medium" htmlFor="size">{'\uD83D\uDCE6'} Size</label>
+                <label className="mb-1 block text-sm font-medium" htmlFor="size">📐 Size</label>
                 <input className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="size" type="text" placeholder="1x40 HQ" {...register('size')} />
               </div>
               <div className="form-group">
-                <label className="mb-1 block text-sm font-medium" htmlFor="transitTime">{'\u23F1\uFE0F'} Transit</label>
+                <label className="mb-1 block text-sm font-medium" htmlFor="transitTime">⏳ Transit</label>
                 <input className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="transitTime" type="text" placeholder="30 Days" {...register('transitTime')} />
               </div>
               <div className="form-group">
-                <label className="mb-1 block text-sm font-medium" htmlFor="etd">{'\u2693\uFE0F'} ETD</label>
+                <label className="mb-1 block text-sm font-medium" htmlFor="etd">📤 ETD</label>
                 <input className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="etd" type="date" {...register('etd')} />
               </div>
               <div className="form-group">
-                <label className="mb-1 block text-sm font-medium" htmlFor="eta">{'\uD83D\uDCCD'} ETA</label>
+                <label className="mb-1 block text-sm font-medium" htmlFor="eta">📥 ETA</label>
                 <input className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="eta" type="date" {...register('eta')} />
               </div>
             </div>
@@ -324,9 +357,9 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
           {/* Section: Forwarder Quotes */}
           <div className="form-section">
             <div className="form-section-header">
-              <span className="section-icon">{'\uD83D\uDCB3'}</span>
+              <span className="section-icon">📑</span>
               <span>Forwarder Quotes</span>
-              <span className="section-count">{validQuotes.length} of {fields.length}</span>
+              <span className="section-count">{validQuotesConverted.length} of {fields.length}</span>
             </div>
             <div className="quotes-grid">
               {fields.map((field, index) => (
@@ -341,8 +374,13 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
                         <option key={f.id} value={f.name}>{f.name}</option>
                       ))}
                     </select>
-                    <div className="quote-card-input">
-                      <span className="quote-card-currency">AED</span>
+                    <div className="quote-card-input flex gap-2">
+                      <select
+                        className="w-[85px] rounded border border-[var(--border)] bg-[var(--bg-main)] px-1.5 py-2 text-xs text-[var(--text)] outline-none focus:border-[var(--accent)] cursor-pointer"
+                        {...register(`quotes.${index}.currency`)}
+                      >
+                        {CURRENCY_LIST.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
                       <input
                         className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]"
                         id={`quotes.${index}.quotedAmount`}
@@ -354,34 +392,34 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
                     </div>
                     {fields.length > 1 && (
                       <button type="button" className="quote-card-remove" onClick={() => remove(index)} title="Remove">
-                        {'\u2715'}
+                        ✕
                       </button>
                     )}
                   </div>
-                  {awardedTo === field.forwarder && <span className="quote-card-badge">{'\u2B50'} Awarded</span>}
+                  {awardedTo === field.forwarder && <span className="quote-card-badge">⭐ Awarded</span>}
                 </div>
               ))}
             </div>
             <button type="button" className="btn btn-add-forwarder mt-3 flex items-center gap-2 rounded border border-[var(--border)] bg-[var(--bg-main)] px-4 py-2 text-sm text-[var(--text)] hover:bg-[var(--card-bg)]" onClick={handleAddForwarder}>
-              {'\u2795'} Add Quote
+              ➕ Add Quote
             </button>
           </div>
 
           {/* Section: Award */}
           <div className="form-section">
             <div className="form-section-header">
-              <span className="section-icon">{'\uD83C\uDFC6'}</span>
+              <span className="section-icon">🏆</span>
               <span>Award</span>
             </div>
             <div className="form-grid form-grid-3">
               <div className="form-group">
-                <label className="mb-1 block text-sm font-medium" htmlFor="status">{'\uD83D\uDCCA'} Status</label>
+                <label className="mb-1 block text-sm font-medium" htmlFor="status">📈 Status</label>
                 <select className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="status" {...register('status')}>
                   {STATUS_LIST.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
               <div className="form-group">
-                <label className="mb-1 block text-sm font-medium" htmlFor="awardedTo">{'\u2B50'} Awarded To</label>
+                <label className="mb-1 block text-sm font-medium" htmlFor="awardedTo">⭐ Awarded To</label>
                 <select className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="awardedTo" {...register('awardedTo')}>
                   <option value="">-- Select --</option>
                   {forwarders.map(f => (
@@ -390,26 +428,26 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
                 </select>
               </div>
               <div className="form-group">
-                <label className="mb-1 block text-sm font-medium" htmlFor="savings">{'\uD83D\uDCB0'} Savings (AED)</label>
+                <label className="mb-1 block text-sm font-medium" htmlFor="savings">💵 Savings ({poValueCurrency})</label>
                 {autoSavings !== null ? (
-                  <input className="savings-auto w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none" id="savings" type="text" readOnly value={`AED ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(autoSavings)} (auto)`} />
+                  <input className="savings-auto w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none" id="savings" type="text" readOnly value={`${poValueCurrency} ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(autoSavings)} (auto)`} />
                 ) : (
                   <input className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="savings" type="number" step="0.01" placeholder="Manual (1 quote)" {...register('savings')} />
                 )}
               </div>
             </div>
             <div className="form-group mt-3">
-              <label className="mb-1 block text-sm font-medium" htmlFor="remarks">{'\uD83D\uDCDD'} Remarks</label>
+              <label className="mb-1 block text-sm font-medium" htmlFor="remarks">📝 Remarks</label>
               <input className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="remarks" type="text" placeholder="Optional notes" maxLength={500} {...register('remarks')} />
             </div>
           </div>
 
           <div className="form-actions">
             <button type="button" className="btn btn-secondary" onClick={onClose}>
-              {'\u274C'} Cancel
+              ❌ Cancel
             </button>
             <button type="submit" className="btn btn-primary btn-submit">
-              {quotation ? '\u{1F4BE} Update' : '\u2795 Add'} Quotation
+              💾 {quotation ? 'Update' : 'Add'} Quotation
             </button>
           </div>
         </form>

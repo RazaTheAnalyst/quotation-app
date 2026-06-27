@@ -1,5 +1,6 @@
 import type { Quotation, QuotationInput, Forwarder } from './types';
 import { supabase } from './supabase';
+import { convertCurrency } from './types';
 
 // --- Row types (snake_case from Supabase) ---
 interface QuotationRow {
@@ -34,16 +35,28 @@ interface ForwarderRow {
 
 // --- Mappers ---
 function rowToQuotation(row: QuotationRow): Quotation {
-  // Handle quotes that might be stored as string, null, or with different key names
-  let parsedQuotes: { forwarder: string; quotedAmount: number }[] = [];
+  let parsedQuotes: { forwarder: string; quotedAmount: number; currency?: string }[] = [];
+  let poValueCurrency = 'AED';
+
   if (row.quotes != null) {
     if (typeof row.quotes === 'string') {
       try {
         const parsed = JSON.parse(row.quotes);
-        if (Array.isArray(parsed)) {
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          poValueCurrency = String(parsed.poValueCurrency ?? 'AED');
+          const items = parsed.items;
+          if (Array.isArray(items)) {
+            parsedQuotes = items.map((q: Record<string, unknown>) => ({
+              forwarder: String(q.forwarder ?? ''),
+              quotedAmount: Number(q.quotedAmount ?? q.quoted_amount ?? 0),
+              currency: String(q.currency ?? 'AED'),
+            }));
+          }
+        } else if (Array.isArray(parsed)) {
           parsedQuotes = parsed.map((q: Record<string, unknown>) => ({
             forwarder: String(q.forwarder ?? ''),
             quotedAmount: Number(q.quotedAmount ?? q.quoted_amount ?? 0),
+            currency: String(q.currency ?? 'AED'),
           }));
         }
       } catch {
@@ -55,8 +68,23 @@ function rowToQuotation(row: QuotationRow): Quotation {
         return {
           forwarder: String(obj.forwarder ?? ''),
           quotedAmount: Number(obj.quotedAmount ?? obj.quoted_amount ?? 0),
+          currency: String(obj.currency ?? 'AED'),
         };
       });
+    } else if (typeof row.quotes === 'object' && row.quotes !== null) {
+      const obj = row.quotes as Record<string, unknown>;
+      poValueCurrency = String(obj.poValueCurrency ?? 'AED');
+      const items = obj.items;
+      if (Array.isArray(items)) {
+        parsedQuotes = items.map((q) => {
+          const qObj = q as Record<string, unknown>;
+          return {
+            forwarder: String(qObj.forwarder ?? ''),
+            quotedAmount: Number(qObj.quotedAmount ?? qObj.quoted_amount ?? 0),
+            currency: String(qObj.currency ?? 'AED'),
+          };
+        });
+      }
     }
   }
 
@@ -66,6 +94,7 @@ function rowToQuotation(row: QuotationRow): Quotation {
     supplierName: row.supplier_name ?? '',
     supplierPO: row.supplier_po ?? '',
     poValue: Number(row.po_value) || 0,
+    poValueCurrency,
     origin: row.origin ?? '',
     destination: row.destination ?? '',
     mode: row.mode ?? '',
@@ -105,7 +134,10 @@ function quotationInputToRow(data: QuotationInput, percentage = 0) {
     size: data.size,
     transit_time: data.transitTime,
     incoterms: data.incoterms,
-    quotes: data.quotes,
+    quotes: JSON.stringify({
+      poValueCurrency: data.poValueCurrency || 'AED',
+      items: data.quotes,
+    }),
     awarded_to: data.awardedTo,
     remarks: data.remarks,
     percentage,
@@ -139,40 +171,25 @@ function safeMax(arr: number[]): number {
   return max;
 }
 
-function normalizeQuotes(raw: unknown): { forwarder: string; quotedAmount: number }[] {
-  if (!raw) return [];
-  let arr: unknown[];
-  if (typeof raw === 'string') {
-    try { arr = JSON.parse(raw); } catch { return []; }
-  } else if (Array.isArray(raw)) {
-    arr = raw;
-  } else {
-    return [];
-  }
-  return arr.map((q) => {
-    const obj = q as Record<string, unknown>;
-    return {
-      forwarder: String(obj.forwarder ?? ''),
-      quotedAmount: Number(obj.quotedAmount ?? obj.quoted_amount ?? 0),
-    };
-  });
-}
 
-function computePercentage(data: { poValue?: number; quotes?: { forwarder: string; quotedAmount: number }[] }): number {
+function computePercentage(data: { poValue?: number; poValueCurrency?: string; quotes?: { forwarder: string; quotedAmount: number; currency?: string }[] }): number {
   const poValue = data.poValue ?? 0;
   if (poValue <= 0) return 0;
+  const poCurrency = data.poValueCurrency || 'AED';
   const validQuotes = (data.quotes ?? []).filter(q => q.quotedAmount > 0);
   if (validQuotes.length === 0) return 0;
-  const lowestAmount = safeMin(validQuotes.map(q => q.quotedAmount));
+  const convertedAmounts = validQuotes.map(q => convertCurrency(q.quotedAmount, q.currency || 'AED', poCurrency));
+  const lowestAmount = safeMin(convertedAmounts);
   return Math.round((lowestAmount / poValue) * 10000) / 100;
 }
 
-function computeSavings(data: { quotes?: { forwarder: string; quotedAmount: number }[]; savings?: number }, manualSavings?: number): number {
+function computeSavings(data: { poValueCurrency?: string; quotes?: { forwarder: string; quotedAmount: number; currency?: string }[]; savings?: number }, manualSavings?: number): number {
   const validQuotes = (data.quotes ?? []).filter(q => q.quotedAmount > 0);
   if (validQuotes.length < 2) return manualSavings ?? data.savings ?? 0;
-  const amounts = validQuotes.map(q => q.quotedAmount);
-  const highest = safeMax(amounts);
-  const lowest = safeMin(amounts);
+  const poCurrency = data.poValueCurrency || 'AED';
+  const convertedAmounts = validQuotes.map(q => convertCurrency(q.quotedAmount, q.currency || 'AED', poCurrency));
+  const highest = safeMax(convertedAmounts);
+  const lowest = safeMin(convertedAmounts);
   return Math.round((highest - lowest) * 100) / 100;
 }
 
@@ -219,10 +236,12 @@ export async function updateQuotationAPI(id: number, input: Partial<QuotationInp
   if (!existing) throw new Error('Quotation not found');
 
   const existingRow = existing as QuotationRow;
+  const parsedExisting = rowToQuotation(existingRow);
 
   // Build merged data for recomputation
-  const mergedQuotes = input.quotes !== undefined ? input.quotes : normalizeQuotes(existingRow.quotes);
-  const mergedPoValue = input.poValue !== undefined ? input.poValue : (Number(existingRow.po_value) || 0);
+  const mergedQuotes = input.quotes !== undefined ? input.quotes : parsedExisting.quotes;
+  const mergedPoValueCurrency = input.poValueCurrency !== undefined ? input.poValueCurrency : parsedExisting.poValueCurrency;
+  const mergedPoValue = input.poValue !== undefined ? input.poValue : parsedExisting.poValue;
 
   const row: Record<string, unknown> = {};
   if (input.entity !== undefined) row.entity = input.entity;
@@ -235,7 +254,12 @@ export async function updateQuotationAPI(id: number, input: Partial<QuotationInp
   if (input.size !== undefined) row.size = input.size;
   if (input.transitTime !== undefined) row.transit_time = input.transitTime;
   if (input.incoterms !== undefined) row.incoterms = input.incoterms;
-  if (input.quotes !== undefined) row.quotes = input.quotes;
+  
+  row.quotes = JSON.stringify({
+    poValueCurrency: mergedPoValueCurrency || 'AED',
+    items: mergedQuotes,
+  });
+
   if (input.awardedTo !== undefined) row.awarded_to = input.awardedTo;
   if (input.remarks !== undefined) row.remarks = input.remarks;
   if (input.percentage !== undefined) row.percentage = input.percentage;
@@ -245,9 +269,9 @@ export async function updateQuotationAPI(id: number, input: Partial<QuotationInp
   if (input.savings !== undefined) row.savings = input.savings;
 
   // Recompute percentage and savings using merged data
-  if (input.quotes !== undefined || input.poValue !== undefined) {
-    const percentage = computePercentage({ quotes: mergedQuotes, poValue: mergedPoValue });
-    const savings = computeSavings({ quotes: mergedQuotes }, input.savings);
+  if (input.quotes !== undefined || input.poValue !== undefined || input.poValueCurrency !== undefined) {
+    const percentage = computePercentage({ quotes: mergedQuotes, poValue: mergedPoValue, poValueCurrency: mergedPoValueCurrency });
+    const savings = computeSavings({ quotes: mergedQuotes, poValueCurrency: mergedPoValueCurrency }, input.savings);
     row.percentage = percentage;
     row.savings = savings;
   }

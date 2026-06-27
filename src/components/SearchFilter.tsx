@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useCallback } from 'react';
 import { ENTITIES, STATUS_LIST } from '../types';
 import type { Filters } from '../types';
 
@@ -10,12 +10,9 @@ interface SearchFilterProps {
 }
 
 export default function SearchFilter({ filters, onFilterChange, resultCount, totalCount }: SearchFilterProps) {
-  const filtersRef = useRef(filters);
-  filtersRef.current = filters;
-
   const handleChange = useCallback((key: keyof Filters, value: string) => {
-    onFilterChange({ ...filtersRef.current, [key]: value });
-  }, [onFilterChange]);
+    onFilterChange({ ...filters, [key]: value });
+  }, [filters, onFilterChange]);
 
   const hasActiveFilters = filters.search || filters.entity || filters.status;
 
@@ -23,7 +20,7 @@ export default function SearchFilter({ filters, onFilterChange, resultCount, tot
     <div className="flex flex-wrap gap-3 items-center">
       <div className="relative flex-1 min-w-[200px]">
         <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]">
-          {'\uD83D\uDD0D'}
+          🔍
         </span>
         <input
           type="text"
@@ -38,7 +35,7 @@ export default function SearchFilter({ filters, onFilterChange, resultCount, tot
             title="Clear search"
             className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text)] cursor-pointer transition-colors"
           >
-            {'\u2715'}
+            ✕
           </button>
         )}
       </div>

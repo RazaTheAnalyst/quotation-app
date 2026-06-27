@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Forwarder } from '../types';
+import { useAuth } from '../auth';
 
 interface ForwardersProps {
   forwarders: Forwarder[];
@@ -9,6 +10,8 @@ interface ForwardersProps {
 
 export default function Forwarders({ forwarders, onAdd, onDelete }: ForwardersProps) {
   const [showForm, setShowForm] = useState(false);
+  const { user } = useAuth();
+  const isAdmin = user?.email === 'admin@netceedmea.com';
   const [name, setName] = useState('');
   const [contactPerson, setContactPerson] = useState('');
   const [email, setEmail] = useState('');
@@ -139,21 +142,23 @@ export default function Forwarders({ forwarders, onAdd, onDelete }: ForwardersPr
                   <h3 className="text-[17px] font-bold text-[var(--text)] tracking-tight mb-0.5">{f.name}</h3>
                   {f.contactPerson && <p className="text-[13px] text-[var(--text-secondary)]">{f.contactPerson}</p>}
                 </div>
-                <button
-                  className="w-8 h-8 min-w-[32px] border-none bg-transparent text-[var(--text-muted)] text-base rounded-lg cursor-pointer transition-all duration-200 flex items-center justify-center hover:bg-[var(--danger-bg)] hover:text-[var(--danger)] hover:scale-110"
-                  title="Delete forwarder"
-                  onClick={async () => {
-                    if (window.confirm(`Delete "${f.name}"?`)) {
-                      try {
-                        await onDelete(f.id);
-                      } catch (err) {
-                        console.error('Delete failed:', err);
+                {isAdmin && (
+                  <button
+                    className="w-8 h-8 min-w-[32px] border-none bg-transparent text-[var(--text-muted)] text-base rounded-lg cursor-pointer transition-all duration-200 flex items-center justify-center hover:bg-[var(--danger-bg)] hover:text-[var(--danger)] hover:scale-110"
+                    title="Delete forwarder"
+                    onClick={async () => {
+                      if (window.confirm(`Delete "${f.name}"?`)) {
+                        try {
+                          await onDelete(f.id);
+                        } catch (err) {
+                          console.error('Delete failed:', err);
+                        }
                       }
-                    }
-                  }}
-                >
-                  {'\u2715'}
-                </button>
+                    }}
+                  >
+                    {'\u2715'}
+                  </button>
+                )}
               </div>
 
               <div className="flex flex-col gap-2 pt-3.5 border-t border-[var(--border-light)]">

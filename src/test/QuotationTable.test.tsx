@@ -4,6 +4,16 @@ import userEvent from '@testing-library/user-event';
 import QuotationTable from '../components/QuotationTable';
 import type { Quotation, Forwarder } from '../types';
 
+vi.mock('../auth', () => ({
+  useAuth: () => ({
+    user: { email: 'admin@netceedmea.com' },
+    session: {},
+    loading: false,
+    signIn: vi.fn(),
+    signOut: vi.fn(),
+  }),
+}));
+
 const mockForwarders: Forwarder[] = [
   { id: 1, name: 'BDP', contactPerson: '', email: '', phone: '' },
   { id: 2, name: 'ECU', contactPerson: '', email: '', phone: '' },

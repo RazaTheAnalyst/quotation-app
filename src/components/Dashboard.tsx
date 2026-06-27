@@ -1,4 +1,5 @@
-import { ENTITIES } from '../types';
+import { useState } from 'react';
+import { ENTITIES, CURRENCY_LIST, convertCurrency } from '../types';
 import type { Quotation, Forwarder } from '../types';
 
 interface DashboardProps {
@@ -32,17 +33,27 @@ const STAT_ICON_STYLE: Record<string, { bg: string; color: string }> = {
 const H3_ACCENT_BAR = { background: 'linear-gradient(180deg, var(--primary), var(--cyan))' };
 
 export default function Dashboard({ quotations, forwarders }: DashboardProps) {
+  const [displayCurrency, setDisplayCurrency] = useState<string>('AED');
   const safeNum = (v: number) => (Number.isFinite(v) ? v : 0);
-  const totalPOValue = safeNum(quotations.reduce((sum, q) => sum + (Number.isFinite(q.poValue) ? q.poValue : 0), 0));
+
+  const totalPOValue = safeNum(quotations.reduce((sum, q) => {
+    const valInDisplay = convertCurrency(q.poValue, q.poValueCurrency || 'AED', displayCurrency);
+    return sum + valInDisplay;
+  }, 0));
   const totalQuotations = quotations.length;
 
   const totalFreightSpending = safeNum(quotations.reduce((sum, q) => {
     if (!q.awardedTo) return sum;
     const awardedQuote = q.quotes.find(qu => qu.forwarder === q.awardedTo);
-    return sum + (awardedQuote?.quotedAmount ?? 0);
+    if (!awardedQuote) return sum;
+    const valInDisplay = convertCurrency(awardedQuote.quotedAmount, awardedQuote.currency || 'AED', displayCurrency);
+    return sum + valInDisplay;
   }, 0));
 
-  const totalSavings = safeNum(quotations.reduce((sum, q) => sum + (q.savings ?? 0), 0));
+  const totalSavings = safeNum(quotations.reduce((sum, q) => {
+    const savingsInDisplay = convertCurrency(q.savings || 0, q.poValueCurrency || 'AED', displayCurrency);
+    return sum + savingsInDisplay;
+  }, 0));
 
   const freightVsPO = totalPOValue > 0
     ? ((totalFreightSpending / totalPOValue) * 100).toFixed(1)
@@ -54,7 +65,9 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
     const awarded = quotations.filter(q => q.awardedTo === f);
     const totalValue = awarded.reduce((sum, q) => {
       const quote = q.quotes.find(qu => qu.forwarder === f);
-      return sum + (quote?.quotedAmount ?? 0);
+      if (!quote) return sum;
+      const amtInDisplay = convertCurrency(quote.quotedAmount, quote.currency || 'AED', displayCurrency);
+      return sum + amtInDisplay;
     }, 0);
     return { forwarder: f, count: awarded.length, totalValue };
   });
@@ -66,9 +79,14 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
     const entityFreight = items.reduce((sum, q) => {
       if (!q.awardedTo) return sum;
       const awardedQuote = q.quotes.find(qu => qu.forwarder === q.awardedTo);
-      return sum + (awardedQuote?.quotedAmount ?? 0);
+      if (!awardedQuote) return sum;
+      const amtInDisplay = convertCurrency(awardedQuote.quotedAmount, awardedQuote.currency || 'AED', displayCurrency);
+      return sum + amtInDisplay;
     }, 0);
-    const entityPOValue = items.reduce((s, q) => s + q.poValue, 0);
+    const entityPOValue = items.reduce((s, q) => {
+      const poInDisplay = convertCurrency(q.poValue, q.poValueCurrency || 'AED', displayCurrency);
+      return s + poInDisplay;
+    }, 0);
     const entityFreightPct = entityPOValue > 0 ? ((entityFreight / entityPOValue) * 100).toFixed(1) : '0.0';
     return { entity: e, count: items.length, totalValue: entityPOValue, freight: entityFreight, freightPct: entityFreightPct };
   });
@@ -77,26 +95,38 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
     new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
 
   const statCards: Array<{ key: string; color: string; icon: string; label: string; value: string; sub: string }> = [
-    { key: 'pos', color: 'purple', icon: '\u{1F4CB}', label: 'Total POs', value: String(totalQuotations), sub: `${ENTITIES.length} entities` },
-    { key: 'povalue', color: 'cyan', icon: '\u{1F4B0}', label: 'Total PO Value', value: formatCurrency(totalPOValue), sub: 'AED' },
-    { key: 'freight', color: 'pink', icon: '\u{1F69A}', label: 'Freight Spending', value: formatCurrency(totalFreightSpending), sub: 'AED' },
-    { key: 'pct', color: 'amber', icon: '\u{1F4CA}', label: 'Freight vs PO', value: `${freightVsPO}%`, sub: 'of PO value' },
-    { key: 'savings', color: 'green', icon: '\u{1F4B0}', label: 'Total Savings', value: formatCurrency(totalSavings), sub: 'AED saved' },
+    { key: 'pos', color: 'purple', icon: '📄', label: 'Total POs', value: String(totalQuotations), sub: `${ENTITIES.length} entities` },
+    { key: 'povalue', color: 'cyan', icon: '💵', label: 'Total PO Value', value: formatCurrency(totalPOValue), sub: displayCurrency },
+    { key: 'freight', color: 'pink', icon: '🚛', label: 'Freight Spending', value: formatCurrency(totalFreightSpending), sub: displayCurrency },
+    { key: 'pct', color: 'amber', icon: '📈', label: 'Freight vs PO', value: `${freightVsPO}%`, sub: 'of PO value' },
+    { key: 'savings', color: 'green', icon: '💵', label: 'Total Savings', value: formatCurrency(totalSavings), sub: `${displayCurrency} saved` },
   ];
 
   return (
     <div className="flex flex-col gap-7">
       <div
-        className="relative overflow-hidden rounded-[var(--radius-xl)] px-10 py-9 text-white"
+        className="relative overflow-hidden rounded-[var(--radius-xl)] px-10 py-9 text-white flex flex-col md:flex-row md:items-center md:justify-between gap-4"
         style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%)' }}
       >
-        <h2 className="relative z-10 mb-1.5 text-[28px] font-bold">Quotation Overview</h2>
-        <p className="relative z-10 text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Track and manage your logistics quotations across all entities
-        </p>
+        <div className="relative z-10">
+          <h2 className="mb-1.5 text-[28px] font-bold">Quotation Overview</h2>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Track and manage your logistics quotations across all entities
+          </p>
+        </div>
+        <div className="relative z-10 flex items-center gap-2.5 bg-slate-950/40 p-3 rounded-xl border border-slate-700/50 backdrop-blur">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Display Currency:</span>
+          <select
+            className="rounded border border-slate-650 bg-slate-900 px-3 py-1 text-sm text-white outline-none focus:border-slate-500 cursor-pointer font-semibold shadow-inner"
+            value={displayCurrency}
+            onChange={e => setDisplayCurrency(e.target.value)}
+          >
+            {CURRENCY_LIST.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {statCards.map(sc => {
           const iconStyle = STAT_ICON_STYLE[sc.color] ?? { bg: 'var(--primary-bg)', color: 'var(--primary)' };
           return (
@@ -132,7 +162,7 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
         })}
       </div>
 
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div
           className="rounded-[var(--radius-lg)] border p-6"
           style={{
@@ -151,7 +181,7 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
                 <div className="flex items-center justify-between">
                   <span className="text-[13px] font-semibold">{f.forwarder}</span>
                   <span className="text-xs font-medium tabular-nums" style={{ color: 'var(--text-secondary)' }}>
-                    {f.count} award{f.count !== 1 ? 's' : ''} &middot; AED {formatCurrency(f.totalValue)}
+                    {f.count} award{f.count !== 1 ? 's' : ''} &middot; {displayCurrency} {formatCurrency(f.totalValue)}
                   </span>
                 </div>
                 <div className="h-2 overflow-hidden rounded" style={{ background: 'var(--bg)' }}>
@@ -180,7 +210,7 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
             <span className="inline-block h-[18px] w-1 rounded" style={H3_ACCENT_BAR} />
             By Entity
           </h3>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {entityStats.map(e => (
               <div
                 key={e.entity}
@@ -199,9 +229,9 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
                     {e.count} POs
                   </span>
                 </div>
-                <div className="text-xl font-bold tracking-tight">AED {formatCurrency(e.totalValue)}</div>
+                <div className="text-xl font-bold tracking-tight">{displayCurrency} {formatCurrency(e.totalValue)}</div>
                 <div className="mt-1 text-sm font-semibold" style={{ color: 'var(--primary)' }}>
-                  Freight: AED {formatCurrency(e.freight)}
+                  Freight: {displayCurrency} {formatCurrency(e.freight)}
                 </div>
                 <div className="mt-1 text-xs font-semibold" style={{ color: 'var(--primary)' }}>
                   {e.freightPct}% of PO Value

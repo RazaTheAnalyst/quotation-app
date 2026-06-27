@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import { useStore } from './store';
 import { useAuth, AuthProvider } from './auth';
 import { ThemeProvider, useTheme } from './theme';
-import type { Quotation, QuotationInput, Filters } from './types';
+import type { Quotation, QuotationInput, Filters, Forwarder } from './types';
 import Dashboard from './components/Dashboard';
 import QuotationTable from './components/QuotationTable';
 import QuotationForm from './components/QuotationForm';
@@ -47,12 +47,52 @@ function ThemeToggle() {
   );
 }
 
+interface QuotationsPageProps {
+  filters: Filters;
+  onFilterChange: (filters: Filters) => void;
+  filteredQuotations: Quotation[];
+  quotations: Quotation[];
+  forwarders: Forwarder[];
+  onEdit: (quotation: Quotation) => void;
+  onDelete: (id: number) => void;
+  onAward: (id: number, forwarder: string) => void;
+  onStatusChange: (id: number, status: string) => void;
+}
+
+function QuotationsPage({
+  filters,
+  onFilterChange,
+  filteredQuotations,
+  quotations,
+  forwarders,
+  onEdit,
+  onDelete,
+  onAward,
+  onStatusChange
+}: QuotationsPageProps) {
+  return (
+    <>
+      <SearchFilter filters={filters} onFilterChange={onFilterChange} resultCount={filteredQuotations.length} totalCount={quotations.length} />
+      <QuotationTable
+        quotations={filteredQuotations}
+        forwarders={forwarders}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onAward={onAward}
+        onStatusChange={onStatusChange}
+      />
+    </>
+  );
+}
+
 function AppContent() {
   const { session, user, loading: authLoading, signOut } = useAuth();
   const { quotations, forwarders, addQuotation, updateQuotation, deleteQuotation, addForwarder, deleteForwarder, loading, error: storeError } = useStore();
   const [showForm, setShowForm] = useState(false);
   const [editingQuotation, setEditingQuotation] = useState<Quotation | null>(null);
   const [filters, setFilters] = useState<Filters>({ search: '', entity: '', status: '' });
+
+  console.log('--- DB Quotations from store:', quotations.map(q => ({ id: q.id, entity: q.entity, status: q.status })));
 
   const filteredQuotations = useMemo(() => {
     return quotations.filter(q => {
@@ -78,6 +118,8 @@ function AppContent() {
       return searchMatch && entityMatch && statusMatch;
     });
   }, [quotations, filters]);
+
+  console.log('--- Filtered Quotations:', filteredQuotations.map(q => q.id));
 
   const handleCloseForm = useCallback(() => {
     setShowForm(false);
@@ -126,12 +168,28 @@ function AppContent() {
   };
 
   const handleDelete = async (id: number) => {
+    if (user?.email !== 'admin@netceedmea.com') {
+      alert('Only the admin can delete quotations.');
+      return;
+    }
     if (window.confirm('Are you sure you want to delete this quotation?')) {
       try {
         await deleteQuotation(id);
       } catch (err) {
         console.error('Delete failed:', err);
       }
+    }
+  };
+
+  const handleDeleteForwarder = async (id: number) => {
+    if (user?.email !== 'admin@netceedmea.com') {
+      alert('Only the admin can delete forwarders.');
+      return;
+    }
+    try {
+      await deleteForwarder(id);
+    } catch (err) {
+      console.error('Delete forwarder failed:', err);
     }
   };
 
@@ -208,17 +266,17 @@ function AppContent() {
           <Route
             path="/quotations"
             element={
-              <>
-                <SearchFilter filters={filters} onFilterChange={setFilters} resultCount={filteredQuotations.length} totalCount={quotations.length} />
-                <QuotationTable
-                  quotations={filteredQuotations}
-                  forwarders={forwarders}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onAward={handleAward}
-                  onStatusChange={handleStatusChange}
-                />
-              </>
+              <QuotationsPage
+                filters={filters}
+                onFilterChange={setFilters}
+                filteredQuotations={filteredQuotations}
+                quotations={quotations}
+                forwarders={forwarders}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onAward={handleAward}
+                onStatusChange={handleStatusChange}
+              />
             }
           />
           <Route
@@ -227,7 +285,7 @@ function AppContent() {
               <Forwarders
                 forwarders={forwarders}
                 onAdd={addForwarder}
-                onDelete={deleteForwarder}
+                onDelete={handleDeleteForwarder}
               />
             }
           />
