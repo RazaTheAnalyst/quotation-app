@@ -91,6 +91,15 @@ function AppContent() {
   const [showForm, setShowForm] = useState(false);
   const [editingQuotation, setEditingQuotation] = useState<Quotation | null>(null);
   const [filters, setFilters] = useState<Filters>({ search: '', entity: '', status: '' });
+  const [toasts, setToasts] = useState<{ id: number; message: string; type: 'success' | 'error' | 'info' | 'warning' }[]>([]);
+
+  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' | 'warning' = 'success') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 4000);
+  }, []);
 
   console.log('--- DB Quotations from store:', quotations.map(q => ({ id: q.id, entity: q.entity, status: q.status })));
 
@@ -152,13 +161,16 @@ function AppContent() {
       const { percentage: _pct, ...input } = data;
       if (editingQuotation) {
         await updateQuotation(editingQuotation.id, input);
+        showToast('Quotation updated successfully!', 'success');
       } else {
         await addQuotation(input);
+        showToast('Quotation created successfully!', 'success');
       }
       setShowForm(false);
       setEditingQuotation(null);
     } catch (err) {
       console.error('Save failed:', err);
+      showToast('Failed to save quotation', 'error');
     }
   };
 
@@ -169,43 +181,80 @@ function AppContent() {
 
   const handleDelete = async (id: number) => {
     if (user?.email !== 'admin@netceedmea.com') {
-      alert('Only the admin can delete quotations.');
+      showToast('Only the admin can delete quotations.', 'error');
       return;
     }
     if (window.confirm('Are you sure you want to delete this quotation?')) {
       try {
         await deleteQuotation(id);
+        showToast('Quotation deleted successfully!', 'success');
       } catch (err) {
         console.error('Delete failed:', err);
+        showToast('Failed to delete quotation', 'error');
       }
     }
   };
 
   const handleDeleteForwarder = async (id: number) => {
     if (user?.email !== 'admin@netceedmea.com') {
-      alert('Only the admin can delete forwarders.');
+      showToast('Only the admin can delete forwarders.', 'error');
       return;
     }
     try {
       await deleteForwarder(id);
+      showToast('Forwarder deleted successfully!', 'success');
     } catch (err) {
       console.error('Delete forwarder failed:', err);
+      showToast('Failed to delete forwarder', 'error');
+    }
+  };
+
+  const handleAddForwarder = async (data: Omit<Forwarder, 'id'>) => {
+    const duplicate = forwarders.some(f => f.name.toLowerCase() === data.name.trim().toLowerCase());
+    if (duplicate) {
+      showToast(`A forwarder named "${data.name.trim()}" already exists.`, 'warning');
+      throw new Error('Duplicate forwarder');
+    }
+    try {
+      await addForwarder(data);
+      showToast(`Forwarder "${data.name}" added successfully!`, 'success');
+    } catch (err) {
+      console.error('Failed to add forwarder:', err);
+      showToast('Failed to add forwarder', 'error');
+      throw err;
     }
   };
 
   const handleAward = async (id: number, forwarder: string) => {
     try {
       await updateQuotation(id, { awardedTo: forwarder });
+      showToast(`Quotation awarded to ${forwarder}!`, 'success');
     } catch (err) {
       console.error('Award failed:', err);
+      showToast('Failed to award forwarder', 'error');
     }
   };
 
   const handleStatusChange = async (id: number, status: string) => {
     try {
-      await updateQuotation(id, { status });
+      let remarksUpdate = {};
+      if (status === 'Assign to forwarder') {
+        const q = quotations.find(item => item.id === id);
+        if (q && !q.awardedTo) {
+          showToast('Please select a forwarder quote to award before approving.', 'warning');
+          return;
+        }
+      }
+      if (status === 'Rejected') {
+        const reason = window.prompt('Please enter the reason for rejection:');
+        if (reason === null) return; // cancel rejection
+        remarksUpdate = { remarks: `Rejected: ${reason.trim() || 'No reason provided.'}` };
+      }
+      await updateQuotation(id, { status, ...remarksUpdate });
+      showToast(`Quotation status updated to ${status}!`, 'success');
     } catch (err) {
       console.error('Status update failed:', err);
+      showToast('Failed to update status', 'error');
     }
   };
 
@@ -284,7 +333,7 @@ function AppContent() {
             element={
               <Forwarders
                 forwarders={forwarders}
-                onAdd={addForwarder}
+                onAdd={handleAddForwarder}
                 onDelete={handleDeleteForwarder}
               />
             }
@@ -306,6 +355,17 @@ function AppContent() {
           onClose={handleCloseForm}
         />
       )}
+
+      <div className="toast-container">
+        {toasts.map(t => (
+          <div key={t.id} className={`toast toast-${t.type}`}>
+            <span className="toast-icon">
+              {t.type === 'success' ? '✔️' : t.type === 'error' ? '❌' : t.type === 'warning' ? '⚠️' : 'ℹ️'}
+            </span>
+            <span className="toast-message">{t.message}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

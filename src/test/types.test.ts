@@ -9,6 +9,8 @@ describe('Types constants', () => {
   it('has correct status list', () => {
     expect(STATUS_LIST).toContain('Pending');
     expect(STATUS_LIST).toContain('Delivered');
-    expect(STATUS_LIST.length).toBe(7);
+    expect(STATUS_LIST).toContain('Awaiting Approval');
+    expect(STATUS_LIST).toContain('Rejected');
+    expect(STATUS_LIST.length).toBe(9);
   });
 });

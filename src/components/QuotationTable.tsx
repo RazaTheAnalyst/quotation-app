@@ -17,13 +17,30 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
   const [detailQuotation, setDetailQuotation] = useState<Quotation | null>(null);
   const { user } = useAuth();
   const isAdmin = user?.email === 'admin@netceedmea.com';
+  const [activeTab, setActiveTab] = useState<'active' | 'pending' | 'rejected'>('active');
+
+  const pendingApprovalsCount = quotations.filter(q => q.status === 'Awaiting Approval').length;
+  const rejectedCount = quotations.filter(q => q.status === 'Rejected').length;
+
+  const displayedQuotations = quotations.filter(q => {
+    if (!isAdmin) {
+      return true;
+    }
+    if (activeTab === 'pending') {
+      return q.status === 'Awaiting Approval';
+    }
+    if (activeTab === 'rejected') {
+      return q.status === 'Rejected';
+    }
+    return q.status !== 'Awaiting Approval' && q.status !== 'Rejected';
+  });
 
   const fmt = (val: number) =>
     new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
 
   const exportToExcel = () => {
     try {
-      const data = quotations.map(q => ({
+      const data = displayedQuotations.map(q => ({
         Entity: q.entity,
         Supplier: q.supplierName,
         'PO Number': q.supplierPO,
@@ -65,6 +82,8 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
   };
 
   const getStatusClass = (status: string) => {
+    if (status === 'Awaiting Approval') return 'status-awaiting-approval';
+    if (status === 'Rejected') return 'status-rejected';
     if (status === 'Delivered') return 'status-delivered';
     if (status === 'In Transit') return 'status-transit';
     if (status === 'Under Clearence') return 'status-clearance';
@@ -80,7 +99,31 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
 
   return (
     <>
-      <div className="table-toolbar flex items-center justify-end gap-3 py-3">
+      <div className="table-toolbar flex items-center justify-between gap-3 py-3">
+        <div>
+          {isAdmin && (
+            <div className="admin-tabs">
+              <button
+                className={`admin-tab-btn ${activeTab === 'active' ? 'active' : ''}`}
+                onClick={() => setActiveTab('active')}
+              >
+                📋 Active
+              </button>
+              <button
+                className={`admin-tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
+                onClick={() => setActiveTab('pending')}
+              >
+                ⏳ Awaiting Approval <span className="admin-tab-badge">{pendingApprovalsCount}</span>
+              </button>
+              <button
+                className={`admin-tab-btn ${activeTab === 'rejected' ? 'active' : ''}`}
+                onClick={() => setActiveTab('rejected')}
+              >
+                ❌ Rejected <span className="admin-tab-badge">{rejectedCount}</span>
+              </button>
+            </div>
+          )}
+        </div>
         <button className="btn btn-export flex items-center gap-2 bg-[var(--card-bg)] text-[var(--text-secondary)] border border-[var(--border)] rounded-[var(--radius-sm)] px-4 py-2 text-sm font-semibold cursor-pointer transition-all hover:bg-[var(--bg)] hover:text-[var(--text)] hover:border-[var(--primary)]" onClick={exportToExcel}>
           📤 Export Excel
         </button>
@@ -104,7 +147,7 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
             </tr>
           </thead>
           <tbody>
-            {quotations.length === 0 ? (
+            {displayedQuotations.length === 0 ? (
               <tr>
                 <td colSpan={11}>
                   <div className="empty-state text-center py-[60px] px-5 text-[var(--text-muted)]">
@@ -114,7 +157,7 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
                 </td>
               </tr>
             ) : (
-              quotations.map((q) => (
+              displayedQuotations.map((q) => (
                 <tr
                   key={q.id}
                   className="quote-row cursor-pointer hover:bg-[rgba(129,140,248,0.04)]"
@@ -131,15 +174,35 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
                   <td className="px-2.5 py-2.5 border-b border-[var(--border-light)] text-[13px]">{q.destination}</td>
                   <td className="px-2.5 py-2.5 border-b border-[var(--border-light)]"><span className="mode-tag inline-flex items-center px-[7px] py-[2px] rounded text-[12px]">{getModeIcon(q.mode)} {q.mode}</span></td>
                   <td className="px-2.5 py-2.5 border-b border-[var(--border-light)]" onClick={e => e.stopPropagation()}>
-                    <select
-                      className={`status-select text-[12px] px-2 py-1 rounded border cursor-pointer ${getStatusClass(q.status)}`}
-                      value={q.status}
-                      onChange={e => onStatusChange(q.id, e.target.value)}
-                    >
-                      {STATUS_LIST.map(s => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
+                    {q.status === 'Awaiting Approval' && isAdmin ? (
+                      <div className="flex gap-2">
+                        <button
+                          className="btn-approve text-[11px] px-2 py-1 rounded"
+                          onClick={() => onStatusChange(q.id, 'Assign to forwarder')}
+                          title="Approve"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          className="btn-reject text-[11px] px-2 py-1 rounded"
+                          onClick={() => onStatusChange(q.id, 'Rejected')}
+                          title="Reject"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    ) : (
+                      <select
+                        className={`status-select text-[12px] px-2 py-1 rounded border cursor-pointer ${getStatusClass(q.status)}`}
+                        value={q.status}
+                        onChange={e => onStatusChange(q.id, e.target.value)}
+                        disabled={!isAdmin}
+                      >
+                        {STATUS_LIST.map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    )}
                   </td>
                   <td className="px-2.5 py-2.5 border-b border-[var(--border-light)] text-right font-variant-[tabular-nums] font-medium">{Number.isFinite(q.percentage) ? q.percentage : 0}%</td>
                   <td className="px-2.5 py-2.5 border-b border-[var(--border-light)] text-right font-variant-[tabular-nums] font-semibold text-[var(--success)]">{q.savings > 0 ? fmt(q.savings) : '-'} {q.savings > 0 && <span className="text-[10px] text-[var(--success)] font-normal">{q.poValueCurrency || 'AED'}</span>}</td>
@@ -152,26 +215,34 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
 
       {/* Mobile Cards */}
       <div className="mobile-cards mobile-only flex flex-col gap-3">
-        {quotations.length === 0 ? (
+        {displayedQuotations.length === 0 ? (
           <div className="empty-state text-center py-[60px] px-5 text-[var(--text-muted)]">
             <div className="empty-state-icon text-[48px] mb-4">{'\uD83D\uDD0D'}</div>
             <div className="empty-state-text text-[15px] font-medium">No quotations found</div>
           </div>
         ) : (
-          quotations.map((q) => (
+          displayedQuotations.map((q) => (
             <div key={q.id} className="quotation-card bg-[var(--card-bg)] rounded-xl border border-[var(--border-light)] shadow-[var(--card-shadow)] p-4 cursor-pointer" onClick={() => setDetailQuotation(q)}>
               <div className="card-header flex items-center justify-between mb-2">
                 <span className={`entity-badge inline-flex items-center px-2.5 py-[3px] rounded-full text-[11px] font-bold tracking-[0.04em] uppercase entity-${q.entity.toLowerCase()}`}>{q.entity}</span>
-                <select
-                  className={`status-select status-select-sm text-[12px] px-2 py-1 rounded border cursor-pointer ${getStatusClass(q.status)}`}
-                  value={q.status}
-                  onClick={e => e.stopPropagation()}
-                  onChange={e => onStatusChange(q.id, e.target.value)}
-                >
-                  {STATUS_LIST.map(s => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
+                {q.status === 'Awaiting Approval' && isAdmin ? (
+                  <div className="flex gap-2" onClick={e => e.stopPropagation()}>
+                    <button className="btn-approve text-[11px] px-2.5 py-1 rounded" onClick={() => onStatusChange(q.id, 'Assign to forwarder')}>Approve</button>
+                    <button className="btn-reject text-[11px] px-2.5 py-1 rounded" onClick={() => onStatusChange(q.id, 'Rejected')}>Reject</button>
+                  </div>
+                ) : (
+                  <select
+                    className={`status-select status-select-sm text-[12px] px-2 py-1 rounded border cursor-pointer ${getStatusClass(q.status)}`}
+                    value={q.status}
+                    onClick={e => e.stopPropagation()}
+                    onChange={e => onStatusChange(q.id, e.target.value)}
+                    disabled={!isAdmin}
+                  >
+                    {STATUS_LIST.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                )}
               </div>
               <div className="card-supplier text-base font-semibold text-[var(--text-primary)] mb-1">{q.supplierName}</div>
               <div className="card-po font-['SF_Mono',Consolas,monospace] text-xs text-[var(--text-secondary)] mb-1">{q.supplierPO}</div>
@@ -190,7 +261,11 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
               <div className="card-footer flex items-center justify-between mt-3 pt-3 border-t border-[var(--border-light)]">
                 <span className="card-pct text-sm font-semibold text-[var(--text-secondary)]">{Number.isFinite(q.percentage) ? q.percentage : 0}%</span>
                 <div className="card-actions flex items-center gap-2">
-                  <button className="btn btn-sm btn-edit flex items-center gap-1 px-3 py-1 rounded text-xs font-semibold cursor-pointer transition-all" onClick={(e) => { e.stopPropagation(); onEdit(q); }}>📝 Edit</button>
+                  {!isAdmin && q.status === 'Awaiting Approval' ? (
+                    <button className="btn btn-sm lock-badge flex items-center gap-1 px-3 py-1 rounded text-xs font-semibold" disabled title="Under review. Cannot edit.">🔒 Under Review</button>
+                  ) : (
+                    <button className="btn btn-sm btn-edit flex items-center gap-1 px-3 py-1 rounded text-xs font-semibold cursor-pointer transition-all" onClick={(e) => { e.stopPropagation(); onEdit(q); }}>📝 Edit</button>
+                  )}
                   {isAdmin && (
                     <button className="btn btn-sm btn-delete flex items-center gap-1 px-3 py-1 rounded text-xs font-semibold cursor-pointer transition-all" onClick={(e) => { e.stopPropagation(); onDelete(q.id); }}>🗑️ Delete</button>
                   )}
@@ -231,17 +306,54 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
                 </div>
                 <div>
                   <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1">Status</div>
-                  <select
-                    className={`status-select text-[12px] px-2 py-1 rounded border cursor-pointer ${getStatusClass(detailQuotation.status)}`}
-                    value={detailQuotation.status}
-                    onChange={e => onStatusChange(detailQuotation.id, e.target.value)}
-                  >
-                    {STATUS_LIST.map(s => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
+                  {detailQuotation.status === 'Awaiting Approval' && isAdmin ? (
+                    <div className="flex gap-1.5">
+                      <button
+                        className="btn-approve text-[11px] px-2 py-1 rounded font-semibold cursor-pointer"
+                        onClick={() => {
+                          onStatusChange(detailQuotation.id, 'Assign to forwarder');
+                          setDetailQuotation(prev => prev ? { ...prev, status: 'Assign to forwarder' } : null);
+                        }}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        className="btn-reject text-[11px] px-2 py-1 rounded font-semibold cursor-pointer"
+                        onClick={() => {
+                          onStatusChange(detailQuotation.id, 'Rejected');
+                          setDetailQuotation(prev => prev ? { ...prev, status: 'Rejected' } : null);
+                        }}
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  ) : (
+                    <select
+                      className={`status-select text-[12px] px-2 py-1 rounded border cursor-pointer ${getStatusClass(detailQuotation.status)}`}
+                      value={detailQuotation.status}
+                      onChange={e => {
+                        onStatusChange(detailQuotation.id, e.target.value);
+                        setDetailQuotation(prev => prev ? { ...prev, status: e.target.value } : null);
+                      }}
+                      disabled={!isAdmin}
+                    >
+                      {STATUS_LIST.map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               </div>
+
+              {/* Rejection remarks alert box if status is Rejected */}
+              {detailQuotation.status === 'Rejected' && detailQuotation.remarks && (
+                <div className="rejection-alert p-4 text-sm text-[var(--text)] mb-5">
+                  <div className="font-bold text-red-400 mb-1 flex items-center gap-1.5">
+                    ⚠️ Rejection Reason
+                  </div>
+                  <div className="text-[var(--text-secondary)]">{detailQuotation.remarks}</div>
+                </div>
+              )}
 
               {/* Route Info */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5 p-3 bg-[var(--bg)] rounded-lg border border-[var(--border-light)]">
@@ -299,12 +411,14 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
                       <span className="text-sm font-semibold text-[var(--text-primary)]">{qt.forwarder}</span>
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-bold text-[var(--text-primary)]">{qt.currency || 'AED'} {fmt(qt.quotedAmount)}</span>
-                        <button
-                          className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-semibold cursor-pointer border border-[var(--border-light)] bg-[var(--card-bg)] text-[var(--text-secondary)] transition-all hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)]"
-                          onClick={() => onAward(detailQuotation.id, qt.forwarder)}
-                        >
-                          {detailQuotation.awardedTo === qt.forwarder ? '\u272A Awarded' : '\u2729 Award'}
-                        </button>
+                        {(!(!isAdmin && (detailQuotation.status === 'Awaiting Approval' || detailQuotation.status === 'Rejected'))) && (
+                          <button
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-semibold cursor-pointer border border-[var(--border-light)] bg-[var(--card-bg)] text-[var(--text-secondary)] transition-all hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)]"
+                            onClick={() => onAward(detailQuotation.id, qt.forwarder)}
+                          >
+                            {detailQuotation.awardedTo === qt.forwarder ? '\u272A Awarded' : '\u2729 Award'}
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -321,8 +435,52 @@ export default function QuotationTable({ quotations, forwarders, onEdit, onDelet
 
               {/* Actions */}
               <div className="flex justify-end gap-2 pt-3 border-t border-[var(--border-light)]">
+                {detailQuotation.status === 'Awaiting Approval' && isAdmin && (
+                  <>
+                    {!detailQuotation.awardedTo && (
+                      <span className="text-[11px] flex items-center gap-1 mr-auto self-center font-medium" style={{ color: '#fbbf24' }}>
+                        ⚠️ Award a quote above before approving
+                      </span>
+                    )}
+                    <button
+                      className={`btn btn-approve flex items-center gap-1 px-4 py-2 rounded text-xs font-semibold transition-all ${!detailQuotation.awardedTo ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                      disabled={!detailQuotation.awardedTo}
+                      onClick={() => {
+                        onStatusChange(detailQuotation.id, 'Assign to forwarder');
+                        setDetailQuotation(null);
+                      }}
+                      title={!detailQuotation.awardedTo ? "Please select a forwarder quote to award first" : "Approve quotation"}
+                    >
+                      ✔️ Approve
+                    </button>
+                    <button
+                      className="btn btn-reject flex items-center gap-1 px-4 py-2 rounded text-xs font-semibold cursor-pointer transition-all"
+                      onClick={() => {
+                        onStatusChange(detailQuotation.id, 'Rejected');
+                        setDetailQuotation(null);
+                      }}
+                    >
+                      ❌ Reject
+                    </button>
+                  </>
+                )}
+                {(detailQuotation.status === 'Pending' || detailQuotation.status === 'Sent for quotation') && detailQuotation.quotes.some(q => q.quotedAmount > 0) && (
+                  <button
+                    className="btn btn-submit-approval flex items-center gap-1 px-4 py-2 rounded text-xs font-semibold cursor-pointer transition-all"
+                    onClick={() => {
+                      onStatusChange(detailQuotation.id, 'Awaiting Approval');
+                      setDetailQuotation(null);
+                    }}
+                  >
+                    🚀 Submit for Approval
+                  </button>
+                )}
                 <button className="btn btn-secondary" onClick={() => setDetailQuotation(null)}>Close</button>
-                <button className="btn btn-sm btn-edit flex items-center gap-1 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition-all" onClick={() => { setDetailQuotation(null); onEdit(detailQuotation); }}>📝 Edit</button>
+                {!isAdmin && detailQuotation.status === 'Awaiting Approval' ? (
+                  <button className="btn btn-sm lock-badge flex items-center gap-1 px-3 py-1.5 rounded text-xs font-semibold" disabled title="Under review. Cannot edit.">🔒 Under Review</button>
+                ) : (
+                  <button className="btn btn-sm btn-edit flex items-center gap-1 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition-all" onClick={() => { setDetailQuotation(null); onEdit(detailQuotation); }}>📝 Edit</button>
+                )}
                 {isAdmin && (
                   <button className="btn btn-sm btn-delete flex items-center gap-1 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer transition-all" onClick={() => { setDetailQuotation(null); onDelete(detailQuotation.id); }}>🗑️ Delete</button>
                 )}

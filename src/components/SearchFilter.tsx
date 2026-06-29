@@ -16,6 +16,8 @@ export default function SearchFilter({ filters, onFilterChange, resultCount, tot
 
   const hasActiveFilters = filters.search || filters.entity || filters.status;
 
+  const visibleStatuses = STATUS_LIST;
+
   return (
     <div className="flex flex-wrap gap-3 items-center">
       <div className="relative flex-1 min-w-[200px]">
@@ -53,7 +55,7 @@ export default function SearchFilter({ filters, onFilterChange, resultCount, tot
         className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--card-bg)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)] focus:ring-3 focus:ring-[var(--primary-bg)] transition-colors cursor-pointer"
       >
         <option value="">All Status</option>
-        {STATUS_LIST.map(s => <option key={s} value={s}>{s}</option>)}
+        {visibleStatuses.map(s => <option key={s} value={s}>{s}</option>)}
       </select>
       {hasActiveFilters && resultCount !== undefined && totalCount !== undefined && (
         <span className="px-3 py-1 rounded-full text-sm font-medium bg-[var(--primary-bg)] text-[var(--primary)]">

@@ -46,6 +46,8 @@ export interface Filters {
 export const ENTITIES = ['UAE', 'Qatar', 'Oman', 'KSA'] as const;
 
 export const STATUS_LIST = [
+  'Awaiting Approval',
+  'Rejected',
   'Pending',
   'Sent for quotation',
   'Assign to forwarder',

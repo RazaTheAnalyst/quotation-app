@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { ENTITIES, STATUS_LIST, CURRENCY_LIST, convertCurrency } from '../types';
 import type { Quotation, Forwarder } from '../types';
 import { COUNTRIES, INCOTERMS_LIST, MODES_LIST } from '../locations';
+import { useAuth } from '../auth';
 
 const quotationSchema = z.object({
   entity: z.enum(['UAE', 'Qatar', 'Oman', 'KSA']),
@@ -41,6 +42,9 @@ interface QuotationFormProps {
 }
 
 export default function QuotationForm({ quotation, forwarders, onSave, onClose }: QuotationFormProps) {
+  const { user } = useAuth();
+  const isAdmin = user?.email === 'admin@netceedmea.com';
+
   const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<QuotationFormData>({
     resolver: zodResolver(quotationSchema),
     defaultValues: {
@@ -414,13 +418,19 @@ export default function QuotationForm({ quotation, forwarders, onSave, onClose }
             <div className="form-grid form-grid-3">
               <div className="form-group">
                 <label className="mb-1 block text-sm font-medium" htmlFor="status">📈 Status</label>
-                <select className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="status" {...register('status')}>
-                  {STATUS_LIST.map(s => <option key={s} value={s}>{s}</option>)}
+                <select 
+                  className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)] cursor-pointer" 
+                  id="status" 
+                  {...register('status')}
+                >
+                  {STATUS_LIST.filter(s => isAdmin || (s !== 'Awaiting Approval' && s !== 'Rejected')).map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
                 </select>
               </div>
               <div className="form-group">
                 <label className="mb-1 block text-sm font-medium" htmlFor="awardedTo">⭐ Awarded To</label>
-                <select className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" id="awardedTo" {...register('awardedTo')}>
+                <select className="w-full rounded border border-[var(--border)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)] cursor-pointer" id="awardedTo" {...register('awardedTo')}>
                   <option value="">-- Select --</option>
                   {forwarders.map(f => (
                     <option key={f.id} value={f.name}>{f.name}</option>

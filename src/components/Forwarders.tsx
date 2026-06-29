@@ -21,11 +21,6 @@ export default function Forwarders({ forwarders, onAdd, onDelete }: ForwardersPr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    const duplicate = forwarders.some(f => f.name.toLowerCase() === name.trim().toLowerCase());
-    if (duplicate) {
-      window.confirm(`A forwarder named "${name.trim()}" already exists.`);
-      return;
-    }
     setSubmitting(true);
     try {
       await onAdd({ name: name.trim(), contactPerson: contactPerson.trim(), email: email.trim(), phone: phone.trim() });

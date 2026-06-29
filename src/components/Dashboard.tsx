@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ENTITIES, CURRENCY_LIST, convertCurrency } from '../types';
 import type { Quotation, Forwarder } from '../types';
+import { useAuth } from '../auth';
 
 interface DashboardProps {
   quotations: Quotation[];
@@ -33,16 +35,21 @@ const STAT_ICON_STYLE: Record<string, { bg: string; color: string }> = {
 const H3_ACCENT_BAR = { background: 'linear-gradient(180deg, var(--primary), var(--cyan))' };
 
 export default function Dashboard({ quotations, forwarders }: DashboardProps) {
+  const { user } = useAuth();
+  const isAdmin = user?.email === 'admin@netceedmea.com';
   const [displayCurrency, setDisplayCurrency] = useState<string>('AED');
   const safeNum = (v: number) => (Number.isFinite(v) ? v : 0);
 
-  const totalPOValue = safeNum(quotations.reduce((sum, q) => {
+  const activeQuotations = quotations.filter(q => q.status !== 'Awaiting Approval' && q.status !== 'Rejected');
+  const pendingApprovalsCount = quotations.filter(q => q.status === 'Awaiting Approval').length;
+
+  const totalPOValue = safeNum(activeQuotations.reduce((sum, q) => {
     const valInDisplay = convertCurrency(q.poValue, q.poValueCurrency || 'AED', displayCurrency);
     return sum + valInDisplay;
   }, 0));
-  const totalQuotations = quotations.length;
+  const totalQuotations = activeQuotations.length;
 
-  const totalFreightSpending = safeNum(quotations.reduce((sum, q) => {
+  const totalFreightSpending = safeNum(activeQuotations.reduce((sum, q) => {
     if (!q.awardedTo) return sum;
     const awardedQuote = q.quotes.find(qu => qu.forwarder === q.awardedTo);
     if (!awardedQuote) return sum;
@@ -50,7 +57,7 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
     return sum + valInDisplay;
   }, 0));
 
-  const totalSavings = safeNum(quotations.reduce((sum, q) => {
+  const totalSavings = safeNum(activeQuotations.reduce((sum, q) => {
     const savingsInDisplay = convertCurrency(q.savings || 0, q.poValueCurrency || 'AED', displayCurrency);
     return sum + savingsInDisplay;
   }, 0));
@@ -62,7 +69,7 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
   const forwarderNames = forwarders.map(f => f.name);
 
   const forwarderStats = forwarderNames.map(f => {
-    const awarded = quotations.filter(q => q.awardedTo === f);
+    const awarded = activeQuotations.filter(q => q.awardedTo === f);
     const totalValue = awarded.reduce((sum, q) => {
       const quote = q.quotes.find(qu => qu.forwarder === f);
       if (!quote) return sum;
@@ -75,7 +82,7 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
   const maxForwarderValue = Math.max(...forwarderStats.map(f => f.totalValue), 1);
 
   const entityStats = ENTITIES.map(e => {
-    const items = quotations.filter(q => q.entity === e);
+    const items = activeQuotations.filter(q => q.entity === e);
     const entityFreight = items.reduce((sum, q) => {
       if (!q.awardedTo) return sum;
       const awardedQuote = q.quotes.find(qu => qu.forwarder === q.awardedTo);
@@ -125,6 +132,33 @@ export default function Dashboard({ quotations, forwarders }: DashboardProps) {
           </select>
         </div>
       </div>
+
+      {isAdmin && pendingApprovalsCount > 0 && (
+        <div 
+          className="relative overflow-hidden rounded-2xl p-5 border border-[rgba(99,102,241,0.2)] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-[slideUp_0.3s_ease]"
+          style={{
+            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(6, 182, 212, 0.05) 100%)',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">⏳</span>
+            <div>
+              <h4 className="text-sm font-bold text-white m-0">Action Required: Pending Approvals</h4>
+              <p className="text-xs text-[var(--text-secondary)] mt-1 mb-0">
+                There are <strong>{pendingApprovalsCount} new quotations</strong> that require your review and approval.
+              </p>
+            </div>
+          </div>
+          <Link 
+            to="/quotations" 
+            className="btn btn-primary px-4 py-2 text-xs font-bold rounded-lg cursor-pointer whitespace-nowrap"
+            style={{ textDecoration: 'none' }}
+          >
+            Review Now &rarr;
+          </Link>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {statCards.map(sc => {
